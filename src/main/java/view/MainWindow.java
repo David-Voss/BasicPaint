@@ -39,6 +39,11 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
+    public MenuBarView getMenuBarView() { return menuBarView; }
+    public ToolBarView getToolBarView() { return toolBarView; }
+    public PaintingAreaView getPaintingAreaView() { return paintingAreaView; }
+    public StatusBarView getStatusBarView() { return statusBarView; }
+
     private void setStartingSize() {
         Dimension startingSize = Toolkit.getDefaultToolkit().getScreenSize();
         int width = (startingSize.width - getWidth()) / 3;

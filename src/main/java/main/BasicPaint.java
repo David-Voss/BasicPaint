@@ -1,5 +1,6 @@
 package main;
 
+import controller.MainController;
 import view.MainWindow;
 
 public class BasicPaint {
@@ -9,5 +10,6 @@ public class BasicPaint {
 
     private static void run() {
         MainWindow gui = new MainWindow();
+        new MainController(gui);
     }
 }

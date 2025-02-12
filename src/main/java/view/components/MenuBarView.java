@@ -80,6 +80,7 @@ public class MenuBarView extends JMenuBar{
     // Getter methods to allow access to menu items and components
 
     // File menu getter
+    public JMenu getFileMenu() { return fileMenu; }
     public JMenuItem getOpenFileItem() { return openFileItem; }
     public JMenuItem getNewFileItem() { return newFileItem; }
     public JMenuItem getSaveFileItem() { return saveFileItem; }
@@ -87,6 +88,7 @@ public class MenuBarView extends JMenuBar{
     public JMenuItem getPrintDocumentItem() { return printDocumentItem; }
 
     // Edit menu getter
+    public JMenu getEditMenu() { return editMenu; }
     public JMenuItem getUndoItem() { return undoItem; }
     public JMenuItem getRedoItem() {  return redoItem; }
 
