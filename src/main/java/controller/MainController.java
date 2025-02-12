@@ -23,7 +23,7 @@ public class MainController implements ActionListener {
      */
     public void initialiseShortcuts() {
         // Shortcuts 'File' menu
-        mainWindow.getMenuBarView().getFileMenu().setMnemonic(KeyEvent.VK_F);
+        mainWindow.getMenuBarView().getFileMenu().setMnemonic(KeyEvent.VK_D);
         mainWindow.getMenuBarView().getNewFileItem().setAccelerator(KeyStroke.getKeyStroke('N', InputEvent.CTRL_DOWN_MASK));
         mainWindow.getMenuBarView().getOpenFileItem().setAccelerator(KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
         mainWindow.getMenuBarView().getSaveFileItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
@@ -31,7 +31,7 @@ public class MainController implements ActionListener {
         mainWindow.getMenuBarView().getPrintDocumentItem().setAccelerator(KeyStroke.getKeyStroke('P', InputEvent.CTRL_DOWN_MASK));
 
         // Shortcuts 'Edit' menu
-        mainWindow.getMenuBarView().getEditMenu().setMnemonic(KeyEvent.VK_E);
+        mainWindow.getMenuBarView().getEditMenu().setMnemonic(KeyEvent.VK_B);
         mainWindow.getMenuBarView().getUndoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK));
         mainWindow.getMenuBarView().getRedoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
     }
@@ -50,6 +50,14 @@ public class MainController implements ActionListener {
         // Register listeners for 'Edit' menu actions
         addMenuAction(mainWindow.getMenuBarView().getUndoItem(), "undo");
         addMenuAction(mainWindow.getMenuBarView().getRedoItem(), "redo");
+
+        // Register listeners for 'MenuBar-ToolBar-Buttons'
+        addMenuAction(mainWindow.getMenuBarView().getNewFileButton(), "new");
+        addMenuAction(mainWindow.getMenuBarView().getOpenFileButton(), "open");
+        addMenuAction(mainWindow.getMenuBarView().getSaveFileButton(), "save");
+        addMenuAction(mainWindow.getMenuBarView().getPrintDocumentButton(), "print");
+        addMenuAction(mainWindow.getMenuBarView().getUndoButton(), "undo");
+        addMenuAction(mainWindow.getMenuBarView().getRedoButton(), "redo");
     }
 
     /**
@@ -61,6 +69,17 @@ public class MainController implements ActionListener {
     private void addMenuAction(JMenuItem menuItem, String command) {
         menuItem.addActionListener(this);
         menuItem.setActionCommand(command);
+    }
+
+    /**
+     * Adds an action listener to a button with a specific action command.
+     *
+     * @param jButton The button to which the listener is added.
+     * @param command The action command for event handling.
+     */
+    private void addMenuAction(JButton jButton, String command) {
+        jButton.addActionListener(this);
+        jButton.setActionCommand(command);
     }
 
     @Override
@@ -78,7 +97,7 @@ public class MainController implements ActionListener {
                 //fileMenuManager.openFile();
                 break;
             case "save":
-                System.out.println("SPEICHER");
+                System.out.println("SPEICHERN");
                 //fileMenuManager.saveFile();
                 break;
             case "save_as":
