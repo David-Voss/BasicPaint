@@ -9,7 +9,7 @@ public class PaintingModel {
     private final BufferedImage canvas;
     private final Graphics2D g2d;
     private final List<GraphicElement> elements;
-    private Color currentColor = Color.BLACK;
+    private Color currentColour = Color.BLACK;
     private int strokeWidth = 2;
 
     public PaintingModel(int width, int height) {
@@ -18,14 +18,14 @@ public class PaintingModel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, width, height);
-        g2d.setColor(currentColor);
+        g2d.setColor(currentColour);
         elements = new ArrayList<>();
     }
 
     public BufferedImage getCanvas() { return canvas; }
 
     public void setColor(Color color) {
-        this.currentColor = color;
+        this.currentColour = color;
         g2d.setColor(color);
     }
     public void setStrokeWidth(int width) { this.strokeWidth = width; }

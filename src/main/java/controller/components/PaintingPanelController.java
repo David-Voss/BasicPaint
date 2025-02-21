@@ -1,14 +1,11 @@
 package controller.components;
 
 import model.PaintingModel;
-import model.elements.LineElement;
 import view.components.PaintingPanelView;
 import view.components.ToolBarView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class PaintingPanelController {
     private PaintingPanelView paintingView;
@@ -21,12 +18,13 @@ public class PaintingPanelController {
         this.toolBarView = toolBarView;
 
 
-        toolBarView.getColorPickerButton().addActionListener(e -> changeColour());
+        toolBarView.getColourChooser().getSelectionModel().addChangeListener(e -> changeColour());
         toolBarView.getRectangleButton().addActionListener(e -> activateEraser());
     }
 
     private void changeColour() {
-        Color newColour = JColorChooser.showDialog(paintingView, "Choose Colour", paintingModel.getCanvas().getGraphics().getColor());
+        //Color newColour = JColorChooser.showDialog(toolBarView, "Choose Colour", paintingModel.getCanvas().getGraphics().getColor());
+        Color newColour = toolBarView.getColour();
         if (newColour != null) {
             paintingModel.setColor(newColour);
         }
@@ -35,14 +33,6 @@ public class PaintingPanelController {
     private void activateEraser() {
         paintingModel.setColor(Color.WHITE);
     }
-
-    /*public void setCurrentColor(Color color) {
-        this.currentColor = color;
-    }
-
-    public void setCurrentStrokeWidth(float strokeWidth) {
-        this.currentStrokeWidth = strokeWidth;
-    }*/
 
     public PaintingModel getPaintingModel() {
         return paintingModel;

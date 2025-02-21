@@ -30,8 +30,9 @@ public class MainWindow extends JFrame {
         this.toolBarView = new ToolBarView();
         add(toolBarView, BorderLayout.NORTH);
 
-        this.paintingPanelView = new PaintingPanelView(1500, 1200);
-        JScrollPane scrollPane = new JScrollPane(paintingPanelView);
+        this.paintingPanelView = new PaintingPanelView(1700, 1700);
+        JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPane.setViewportView(paintingPanelView);
         add(scrollPane, BorderLayout.CENTER);
 
         this.statusBarView = new StatusBarView();
