@@ -1,7 +1,7 @@
 package view;
 
 import view.components.MenuBarView;
-import view.components.PaintingAreaView;
+import view.components.PaintingPanelView;
 import view.components.StatusBarView;
 import view.components.ToolBarView;
 
@@ -12,11 +12,12 @@ public class MainWindow extends JFrame {
 
     MenuBarView menuBarView;
     ToolBarView toolBarView;
-    PaintingAreaView paintingAreaView;
+    PaintingPanelView paintingPanelView;
     StatusBarView statusBarView;
 
     public MainWindow() {
         super("BasicPaint");
+        //setLookAndFeel();
         setStartingSize();
         setMinimumSize(new Dimension(700, 500));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -29,8 +30,8 @@ public class MainWindow extends JFrame {
         this.toolBarView = new ToolBarView();
         add(toolBarView, BorderLayout.NORTH);
 
-        this.paintingAreaView = new PaintingAreaView(1500, 1200);
-        JScrollPane scrollPane = new JScrollPane(paintingAreaView);
+        this.paintingPanelView = new PaintingPanelView(1500, 1200);
+        JScrollPane scrollPane = new JScrollPane(paintingPanelView);
         add(scrollPane, BorderLayout.CENTER);
 
         this.statusBarView = new StatusBarView();
@@ -41,8 +42,22 @@ public class MainWindow extends JFrame {
 
     public MenuBarView getMenuBarView() { return menuBarView; }
     public ToolBarView getToolBarView() { return toolBarView; }
-    public PaintingAreaView getPaintingAreaView() { return paintingAreaView; }
+    public PaintingPanelView getPaintingAreaView() { return paintingPanelView; }
     public StatusBarView getStatusBarView() { return statusBarView; }
+
+    private void setLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void setStartingSize() {
         Dimension startingSize = Toolkit.getDefaultToolkit().getScreenSize();

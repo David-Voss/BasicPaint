@@ -1,5 +1,9 @@
 package controller;
 
+import controller.components.MenuBarController;
+import controller.components.PaintingPanelController;
+import controller.components.StatusBarController;
+import controller.components.ToolBarController;
 import view.MainWindow;
 
 import javax.swing.*;
@@ -10,9 +14,18 @@ import java.awt.event.KeyEvent;
 
 public class MainController implements ActionListener {
     private final MainWindow mainWindow;
+    private final MenuBarController menuBarController;
+    private final ToolBarController toolBarController;
+    private final PaintingPanelController paintingController;
+    private final StatusBarController statusBarController;
+
 
     public MainController(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
+        this.menuBarController = new MenuBarController(mainWindow.getMenuBarView());
+        this.toolBarController = new ToolBarController(mainWindow.getToolBarView());
+        this.paintingController = new PaintingPanelController(mainWindow.getPaintingAreaView(), mainWindow.getToolBarView());
+        this.statusBarController = new StatusBarController(mainWindow.getStatusBarView());
 
         initialiseShortcuts();
         initialiseListeners();
