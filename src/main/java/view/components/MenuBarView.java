@@ -1,5 +1,7 @@
 package view.components;
 
+import controller.toolbox.CreateImageButton;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -55,12 +57,12 @@ public class MenuBarView extends JMenuBar{
         addSeparator();
 
         this.menuBarToolBar = new JToolBar();
-        this.newFileButton = createButton("assets/icons/file-regular.png", "Neues Dokument erstellen");
-        this.openFileButton = createButton("assets/icons/folder-open-regular.png", "Datei öffnen");
-        this.saveFileButton = createButton("assets/icons/floppy-disk-regular.png", "Speichern");
-        this.printDocumentButton = createButton("assets/icons/print-solid.png", "Drucken");
-        this.undoButton = createButton("assets/icons/rotate-left-solid.png", "Rückgängig");
-        this.redoButton = createButton("assets/icons/rotate-right-solid.png", "Wiederherstellen");
+        this.newFileButton = CreateImageButton.createButton("assets/icons/file-image-regular.png", "Neues Dokument erstellen");
+        this.openFileButton = CreateImageButton.createButton("assets/icons/folder-open-regular.png", "Datei öffnen");
+        this.saveFileButton = CreateImageButton.createButton("assets/icons/floppy-disk-regular.png", "Speichern");
+        this.printDocumentButton = CreateImageButton.createButton("assets/icons/print-solid.png", "Drucken");
+        this.undoButton = CreateImageButton.createButton("assets/icons/rotate-left-solid.png", "Rückgängig");
+        this.redoButton = CreateImageButton.createButton("assets/icons/rotate-right-solid.png", "Wiederherstellen");
 
 
         add(menuBarToolBar);
@@ -106,32 +108,5 @@ public class MenuBarView extends JMenuBar{
         separator.setPreferredSize(new Dimension(2, 15)); // Set width & height
         add(separator);
         add(Box.createHorizontalStrut(10)); // Adds spacing
-    }
-
-    /**
-     * Creates a button with an icon and tooltip.
-     *
-     * @param iconPath The path to the icon file.
-     * @param tooltip  The tooltip text for the button.
-     * @return The created JButton.
-     */
-    private JButton createButton(String iconPath, String tooltip) {
-        JButton button = new JButton(loadIcon(iconPath, 15, 15));
-        button.setToolTipText(tooltip);
-        return button;
-    }
-
-    /**
-     * Loads and scales an icon to the specified dimensions.
-     *
-     * @param path  The file path of the icon.
-     * @param width The desired width.
-     * @param height The desired height.
-     * @return A scaled {@link ImageIcon}.
-     */
-    private ImageIcon loadIcon(String path, int width, int height) {
-        ImageIcon icon = new ImageIcon(path);
-        Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaledImage);
     }
 }
