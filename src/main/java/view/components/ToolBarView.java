@@ -29,17 +29,8 @@ public class ToolBarView extends JPanel {
         add(rectangleButton);
         add(circleButton);
 
-        this.colourPanel = new JPanel(new FlowLayout());
-        colourChooser = new JColorChooser();
-        colourChooser.setPreviewPanel(new JPanel()); // Remove preview panel to save space
-        for (AbstractColorChooserPanel panel : colourChooser.getChooserPanels()) {
-            if (!panel.getDisplayName().equals("Swatches")) { // Nur "Swatches" behalten
-                colourChooser.removeChooserPanel(panel);
-            }
-        }
-        colourChooser.setPreferredSize(new Dimension(425, 110)); // Adjusted size for better fit
-        colourPanel.add(colourChooser);
-        add(colourPanel, BorderLayout.SOUTH);
+        this.colourPanel = setUpColourPanel();
+        add(colourPanel);
     }
 
     public JComboBox<String> getBrushSizeDropdown() { return brushSizeDropdown; }
@@ -49,4 +40,22 @@ public class ToolBarView extends JPanel {
     public JPanel getColourPanel() { return colourPanel; }
     public JColorChooser getColourChooser() { return colourChooser; }
     public Color getColour() { return colourChooser.getColor(); }
+
+    public JPanel setUpColourPanel() {
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(setUpColourChooser());
+        return panel;
+    }
+
+    public JColorChooser setUpColourChooser() {
+        colourChooser = new JColorChooser();
+        colourChooser.setPreviewPanel(new JPanel()); // Remove preview panel to save space
+        for (AbstractColorChooserPanel panel : colourChooser.getChooserPanels()) {
+            if (!panel.getDisplayName().equals("Swatches")) { // Nur "Swatches" behalten
+                colourChooser.removeChooserPanel(panel);
+            }
+        }
+        colourChooser.setPreferredSize(new Dimension(425, 110)); // Adjusted size for better fit
+        return colourChooser;
+    }
 }
