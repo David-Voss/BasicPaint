@@ -6,7 +6,7 @@ import java.awt.*;
 public class CreateImageButton {
 
     /**
-     * Creates a button with an icon and tooltip.
+     * Creates a button / toggle button with an icon and tooltip.
      *
      * @param iconPath The path to the icon file.
      * @param tooltip  The tooltip text for the button.
@@ -14,6 +14,11 @@ public class CreateImageButton {
      */
     public static JButton createButton(String iconPath, String tooltip) {
         JButton button = new JButton(loadIcon(iconPath, 15, 15));
+        button.setToolTipText(tooltip);
+        return button;
+    }
+    public static JToggleButton createToggleButton(String iconPath, String tooltip) {
+        JToggleButton button = new JToggleButton(loadIcon(iconPath, 15, 15));
         button.setToolTipText(tooltip);
         return button;
     }

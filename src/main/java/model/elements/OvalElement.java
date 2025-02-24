@@ -4,10 +4,10 @@ import model.GraphicElement;
 
 import java.awt.*;
 
-public class CircleElement extends GraphicElement {
+public class OvalElement extends GraphicElement {
     private final int x, y, diameter;
 
-    public CircleElement(int x, int y, int diameter, Color color, float strokeWidth) {
+    public OvalElement(int x, int y, int diameter, Color color, float strokeWidth) {
         super(color, strokeWidth);
         this.x = x;
         this.y = y;

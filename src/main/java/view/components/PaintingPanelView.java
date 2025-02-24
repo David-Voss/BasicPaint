@@ -14,6 +14,11 @@ public class PaintingPanelView extends JPanel {
     public PaintingPanelView(int width, int height) {
         paintingModel = new PaintingModel(width, height);
         setPreferredSize(new Dimension(width, height));
+
+        initialiseListeners();
+    }
+
+    private void initialiseListeners() {
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 x1 = e.getX();

@@ -10,6 +10,8 @@ public class PaintingModel {
     private final Graphics2D g2d;
     private final List<GraphicElement> elements;
     private Color currentColour = Color.BLACK;
+    private Color previousColour = Color.BLACK;
+    private Color tempColour = Color.BLACK;
     private int strokeWidth = 2;
 
     public PaintingModel(int width, int height) {
@@ -23,11 +25,29 @@ public class PaintingModel {
     }
 
     public BufferedImage getCanvas() { return canvas; }
+    public Color getCurrentColour() { return currentColour; }
+    public Color getPreviousColour() { return previousColour; }
+    public Color getTempColour() { return tempColour; }
 
-    public void setColor(Color color) {
-        this.currentColour = color;
-        g2d.setColor(color);
+    public void setCurrentColour(Color colour) {
+        colourChange();
+        this.currentColour = colour;
+        g2d.setColor(colour);
     }
+
+    public void colourChange() {
+        this.tempColour = this.previousColour;
+        this.previousColour = this.currentColour;
+    }
+
+    public void colourChangeBack() {
+        this.currentColour = this.previousColour;
+        this.previousColour = this.tempColour;
+        g2d.setColor(this.currentColour);
+    }
+
+    public Graphics2D getG2d() { return g2d; }
+
     public void setStrokeWidth(int width) { this.strokeWidth = width; }
 
     public void addElement(GraphicElement element) {
