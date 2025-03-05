@@ -43,7 +43,7 @@ public class MainWindow extends JFrame {
 
     public MenuBarView getMenuBarView() { return menuBarView; }
     public ToolBarView getToolBarView() { return toolBarView; }
-    public PaintingPanelView getPaintingAreaView() { return paintingPanelView; }
+    public PaintingPanelView getPaintingPanelView() { return paintingPanelView; }
     public StatusBarView getStatusBarView() { return statusBarView; }
 
     private void setLookAndFeel() {

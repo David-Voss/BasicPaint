@@ -24,7 +24,7 @@ public class MainController implements ActionListener {
         this.mainWindow = mainWindow;
         this.menuBarController = new MenuBarController(mainWindow.getMenuBarView());
         this.toolBarController = new ToolBarController(mainWindow.getToolBarView());
-        this.paintingController = new PaintingPanelController(mainWindow.getPaintingAreaView(), mainWindow.getToolBarView());
+        this.paintingController = new PaintingPanelController(mainWindow.getPaintingPanelView(), mainWindow.getToolBarView());
         this.statusBarController = new StatusBarController(mainWindow.getStatusBarView());
 
         initialiseShortcuts();

@@ -25,7 +25,8 @@ public class ToolBarView extends JPanel {
         setLayout(new FlowLayout(FlowLayout.LEFT));
         setPreferredSize(new Dimension(1200, 125));
 
-        this.brushSizeDropdown = new JComboBox<>(new String[]{"1px", "2px", "5px", "10px", "20px"});
+        this.brushSizeDropdown = new JComboBox<>(new String[]{"1 px", "2 px", "3 px", "5 px", "10 px", "20 px", "30 px", "50 px", "100 px", "150 px", "200 px", "250 px"});
+        this.brushSizeDropdown.setSelectedItem("3 px");
 
         add(new JLabel("Pinsel: "));
         add(brushSizeDropdown);
@@ -34,6 +35,7 @@ public class ToolBarView extends JPanel {
 
         this.toolsPanel = new JPanel();
         this.pencilButton = CreateImageButton.createToggleButton("assets/icons/pencil-solid.png", "Bleistift [P]");
+        this.pencilButton.setSelected(true);
         this.eraserButton = CreateImageButton.createToggleButton("assets/icons/eraser-solid.png", "Radierer [E]");
 
         add(toolsPanel);
