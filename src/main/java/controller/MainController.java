@@ -1,9 +1,6 @@
 package controller;
 
-import controller.components.MenuBarController;
-import controller.components.PaintingPanelController;
-import controller.components.StatusBarController;
-import controller.components.ToolBarController;
+import controller.components.*;
 import view.MainWindow;
 
 import javax.swing.*;
@@ -13,6 +10,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 public class MainController implements ActionListener {
+
     private final MainWindow mainWindow;
     private final MenuBarController menuBarController;
     private final ToolBarController toolBarController;

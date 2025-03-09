@@ -1,13 +1,11 @@
 package model.elements;
 
-import model.GraphicElement;
-
 import java.awt.*;
 
 public class LineElement extends GraphicElement {
     private final int x1, y1, x2, y2;
 
-    public LineElement(int x1, int y1, int x2, int y2, Color color, float strokeWidth) {
+    public LineElement(int x1, int y1, int x2, int y2, Color color, int strokeWidth) {
         super(color, strokeWidth);
         this.x1 = x1;
         this.y1 = y1;

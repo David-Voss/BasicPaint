@@ -1,6 +1,7 @@
 package view.components;
 
-import controller.toolbox.CreateImageButton;
+import toolbox.CreateImageButton;
+import toolbox.PaintingTool;
 
 import javax.swing.*;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
@@ -14,8 +15,10 @@ public class ToolBarView extends JPanel {
     private final JToggleButton pencilButton;
     private final JToggleButton eraserButton;
 
-    private final JPanel graphicElementsPanel;
-    //private final JButton circleButton;
+    private final JPanel paintingToolPanel;
+    private final ButtonGroup paintingToolButtonGroup;
+    private final JToggleButton lineButton;
+    private final JToggleButton ellipseButton;
     private final JToggleButton rectangleButton;
 
     private final JPanel colourPanel;
@@ -34,22 +37,33 @@ public class ToolBarView extends JPanel {
         addSeparator();
 
         this.toolsPanel = new JPanel();
+        this.paintingToolButtonGroup = new ButtonGroup();
         this.pencilButton = CreateImageButton.createToggleButton("assets/icons/pencil-solid.png", "Bleistift [P]");
+
         this.pencilButton.setSelected(true);
         this.eraserButton = CreateImageButton.createToggleButton("assets/icons/eraser-solid.png", "Radierer [E]");
 
         add(toolsPanel);
+        paintingToolButtonGroup.add(pencilButton);
+        paintingToolButtonGroup.add(eraserButton);
         toolsPanel.add(pencilButton);
         toolsPanel.add(eraserButton);
-        //add(circleButton);
 
         addSeparator();
 
-        this.graphicElementsPanel = new JPanel();
+        this.paintingToolPanel = new JPanel();
+
+        this.lineButton = CreateImageButton.createToggleButton("assets/icons/line-regular.png", "Linie");
+        this.ellipseButton = CreateImageButton.createToggleButton("assets/icons/circle-regular.png","Ellipse");
         this.rectangleButton = CreateImageButton.createToggleButton("assets/icons/square-full-regular.png", "Rechteck");
 
-        add(graphicElementsPanel);
-        graphicElementsPanel.add(rectangleButton);
+        add(paintingToolPanel);
+        paintingToolButtonGroup.add(lineButton);
+        paintingToolButtonGroup.add(ellipseButton);
+        paintingToolButtonGroup.add(rectangleButton);
+        paintingToolPanel.add(lineButton);
+        paintingToolPanel.add(ellipseButton);
+        paintingToolPanel.add(rectangleButton);
 
         addSeparator();
 
@@ -59,9 +73,11 @@ public class ToolBarView extends JPanel {
     }
 
     public JComboBox<String> getBrushSizeDropdown() { return brushSizeDropdown; }
+    public ButtonGroup getPaintingToolButtonGroup() { return paintingToolButtonGroup; }
     public JToggleButton getPencilButton() { return pencilButton; }
     public JToggleButton getEraserButton() { return eraserButton; }
-    //public JButton getCircleButton() { return circleButton; }
+    public JToggleButton getLineButton() { return lineButton; }
+    public JToggleButton getEllipseButton() { return ellipseButton; }
     public JToggleButton getRectangleButton() { return rectangleButton; }
     public JPanel getColourPanel() { return colourPanel; }
     public JColorChooser getColourChooser() { return colourChooser; }
@@ -91,5 +107,18 @@ public class ToolBarView extends JPanel {
         separator.setPreferredSize(new Dimension(2, 100)); // Set width & height
         add(separator);
         add(Box.createHorizontalStrut(2)); // Adds spacing
+    }
+
+    public PaintingTool getSelectedTool() {
+        if (pencilButton.isSelected() && lineButton.isSelected()) return PaintingTool.LINE;
+        if (pencilButton.isSelected() && ellipseButton.isSelected()) return PaintingTool.ELLIPSE;
+        if (pencilButton.isSelected() && rectangleButton.isSelected()) return PaintingTool.RECTANGLE;
+
+        if (pencilButton.isSelected()) return PaintingTool.PENCIL;
+        if (lineButton.isSelected()) return PaintingTool.LINE;
+        if (eraserButton.isSelected()) return PaintingTool.ERASER;
+        if (ellipseButton.isSelected()) return PaintingTool.ELLIPSE;
+        if (rectangleButton.isSelected()) return PaintingTool.RECTANGLE;
+        return null;
     }
 }

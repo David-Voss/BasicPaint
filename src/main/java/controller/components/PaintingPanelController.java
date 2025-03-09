@@ -1,61 +1,179 @@
 package controller.components;
 
+import toolbox.PaintingTool;
 import model.PaintingModel;
 import view.components.PaintingPanelView;
 import view.components.ToolBarView;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 
 public class PaintingPanelController {
     private PaintingPanelView paintingView;
     private PaintingModel paintingModel;
-    private final ToolBarView toolBarView;
+    private ToolBarView toolBarView;
 
-    private int x1, y1, x2, y2;
+
+    private Point startPoint;
+    private Point endPoint;
+    private boolean isDragging = false;
+    private boolean isDrawingShape = false; // Neue Variable für Form-Zeichnen
 
     public PaintingPanelController(PaintingPanelView paintingView, ToolBarView toolBarView) {
         this.paintingView = paintingView;
         this.paintingModel = paintingView.getPaintingModel();
         this.toolBarView = toolBarView;
 
+        paintingView.setFocusable(true);
+        paintingView.requestFocus();
+
         initialiseListeners();
     }
-
-    public PaintingModel getPaintingModel() { return paintingModel; }
 
     private void initialiseListeners() {
         paintingView.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                x1 = e.getX();
-                y1 = e.getY();
+                startPoint = e.getPoint();
+                isDragging = true;
+                isDrawingShape = true;
+
+                if (isPaintingToolSelected(PaintingTool.PENCIL) || isPaintingToolSelected(PaintingTool.ERASER)) {
+                    drawPoint(e.getX(), e.getY());
+                    paintingView.repaint();
+                } else if (SwingUtilities.isRightMouseButton(e) && !isPencilOrEraserSelected()) {
+                    System.out.println("Zeichnen abgebrochen (rechte Maustaste).");
+                    cancelDrawing();
+                    return; // Sofort beenden, nichts weiter tun
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (isDragging) {
+                    endPoint = e.getPoint();
+                    PaintingTool selectedTool = toolBarView.getSelectedTool();
+
+                    switch (selectedTool) {
+                        case RECTANGLE:
+                            paintingModel.drawRectangle(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                            break;
+                        case ELLIPSE:
+                            paintingModel.drawEllipse(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                            break;
+                        case LINE:
+                            paintingModel.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    paintingView.clearPreviewShape();
+                    paintingView.repaint();
+                }
+                isDragging = false;
             }
         });
+
         paintingView.addMouseMotionListener(new MouseAdapter() {
             public void mouseDragged(MouseEvent e) {
-                if (isPaintingToolSelected()) {
-                    x2 = e.getX();
-                    y2 = e.getY();
+                if (isPencilOrEraserSelected() && !isPaintingToolSelected()) {
 
-                    drawLine(x1, y1, x2, y2);
-                    x1 = x2;
-                    y1 = y2;
-                    paintingView.repaint();
+                }
+
+                if (isDragging) {
+                    if (isPencilOrEraserSelected() || isPaintingToolSelected()) {
+                        Point endPoint = e.getPoint();
+                        PaintingTool selectedTool = toolBarView.getSelectedTool();
+
+                        Shape previewShape = null;
+
+                        switch (selectedTool) {
+                            case PENCIL, ERASER:
+                                endPoint = e.getPoint();
+                                drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                                startPoint = endPoint;
+                                break;
+                            case RECTANGLE:
+                                previewShape = new Rectangle2D.Float(
+                                        Math.min(startPoint.x, endPoint.x),
+                                        Math.min(startPoint.y, endPoint.y),
+                                        Math.abs(startPoint.x - endPoint.x),
+                                        Math.abs(startPoint.y - endPoint.y)
+                                );
+                                break;
+                            case ELLIPSE:
+                                previewShape = new Ellipse2D.Float(
+                                        Math.min(startPoint.x, endPoint.x),
+                                        Math.min(startPoint.y, endPoint.y),
+                                        Math.abs(startPoint.x - endPoint.x),
+                                        Math.abs(startPoint.y - endPoint.y)
+                                );
+                                break;
+                            case LINE:
+                                previewShape = new Line2D.Float(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                                break;
+                            case null, default:
+                                break;
+                        }
+
+                        // Vorschau in der View setzen
+                        paintingView.setPreviewShape(previewShape);
+                    }
                 }
             }
         });
 
-        toolBarView.getBrushSizeDropdown().addActionListener(e -> updateStrokeWidth());
-        toolBarView.getPencilButton().addActionListener(e -> activatePencil());
-        toolBarView.getEraserButton().addActionListener(e -> activateEraser());
-        toolBarView.getRectangleButton().addActionListener(e -> paintingModel.getG2d().drawRect(50,50,100,100));
-        toolBarView.getColourChooser().getSelectionModel().addChangeListener(e -> changeColour());
+        paintingView.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    if (isDragging || isDrawingShape) {  // Prüft beides: Linien & Formen
+                        System.out.println("Zeichnen abgebrochen (ESC gedrückt).");
+                        cancelDrawing();
+                        e.consume(); // Verhindert, dass ESC andere Events auslöst
+                    }
+                }
+            }
+        });
+
+        toolBarView.getBrushSizeDropdown().addActionListener(e -> {
+            updateStrokeWidth();
+            ensureFocus();
+        });
+        toolBarView.getPencilButton().addActionListener(e -> ensureFocus());
+        toolBarView.getEraserButton().addActionListener(e -> ensureFocus());
+        toolBarView.getLineButton().addActionListener(e -> ensureFocus());
+        toolBarView.getEllipseButton().addActionListener(e -> ensureFocus());
+        toolBarView.getRectangleButton().addActionListener(e -> ensureFocus());
+        toolBarView.getColourChooser().getSelectionModel().addChangeListener(e -> {
+            changeColour();
+            ensureFocus();
+        });
     }
 
+    private void ensureFocus() {
+        SwingUtilities.invokeLater(() -> paintingView.requestFocusInWindow());
+    }
+
+    private void cancelDrawing() {
+        System.out.println("Zeichenvorgang abgebrochen.");
+        isDragging = false;
+        isDrawingShape = false; // Form-Zeichnen abbrechen
+        startPoint = null;
+        endPoint = null;
+        paintingView.clearPreviewShape(); // Vorschau löschen
+        paintingView.repaint(); // Ansicht aktualisieren
+    }
+
+
     private void changeColour() {
-        disableEraserIfActive();
-        toolBarView.getPencilButton().setSelected(true);
         Color newColour = toolBarView.getColour();
         if (newColour != null) {
             paintingModel.setCurrentColour(newColour);
@@ -71,48 +189,42 @@ public class PaintingPanelController {
         }
     }
 
-    public void drawLine(int x1, int y1, int x2, int y2) {
-        if (!isPaintingToolSelected()) return;
+    private void eraserOrOtherToolColor() {
+        Graphics2D g2d = paintingModel.getG2D();
 
-        paintingModel.getG2D().setStroke(new BasicStroke(paintingModel.getStrokeWidth(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        paintingModel.getG2D().drawLine(x1, y1, x2, y2);
+        if (toolBarView.getEraserButton().isSelected()) {
+            g2d.setColor(paintingModel.getBackgroundColour());
+        } else {
+            g2d.setColor(paintingModel.getCurrentColour());
+        }
+    }
+
+    public void drawPoint(int x, int y) {
+        Graphics2D g2d = paintingModel.getG2D();
+        eraserOrOtherToolColor();
+        g2d.fillOval(x - paintingModel.getStrokeWidth() / 2,
+                y - paintingModel.getStrokeWidth() / 2,
+                paintingModel.getStrokeWidth(),
+                paintingModel.getStrokeWidth());
+    }
+
+    public void drawLine(int x1, int y1, int x2, int y2) {
+        if (!isPencilOrEraserSelected()) return;
+        Graphics2D g2d = paintingModel.getG2D();
+        eraserOrOtherToolColor();
+        g2d.setStroke(new BasicStroke(paintingModel.getStrokeWidth(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.drawLine(x1, y1, x2, y2);
+    }
+
+    private boolean isPencilOrEraserSelected() {
+        return toolBarView.getPencilButton().isSelected() || toolBarView.getEraserButton().isSelected();
     }
 
     private boolean isPaintingToolSelected() {
-        if (!toolBarView.getPencilButton().isSelected() && !toolBarView.getEraserButton().isSelected()) {
-            return false;
-        } else {
-            return true;
-        }
+        return toolBarView.getLineButton().isSelected() || toolBarView.getEllipseButton().isSelected() || toolBarView.getRectangleButton().isSelected();
     }
 
-    private void activatePencil() {
-        if (toolBarView.getEraserButton().isSelected()) {
-            paintingModel.colourChangeBack();
-            disableEraserIfActive();
-        }
-    }
-
-    private void disablePencilIfActive() {
-        if (toolBarView.getPencilButton().isSelected()) {
-            toolBarView.getPencilButton().setSelected(false);
-        }
-    }
-
-    private void activateEraser() {
-        disablePencilIfActive();
-        if (toolBarView.getEraserButton().isSelected()) {
-            paintingModel.setCurrentColour(Color.WHITE);
-        } else {
-            toolBarView.getPencilButton().setSelected(true);
-            paintingModel.colourChangeBack();
-        }
-    }
-
-    private void disableEraserIfActive() {
-        if (toolBarView.getEraserButton().isSelected()) {
-            toolBarView.getEraserButton().setSelected(false);
-            //System.out.println("Radierer deaktiviert");
-        }
+    private boolean isPaintingToolSelected(PaintingTool tool) {
+        return toolBarView.getSelectedTool() == tool;
     }
 }

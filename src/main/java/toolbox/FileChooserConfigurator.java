@@ -1,4 +1,4 @@
-package controller.toolbox;
+package toolbox;
 
 import javax.swing.*;
 import java.awt.*;

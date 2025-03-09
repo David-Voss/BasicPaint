@@ -1,12 +1,12 @@
-package model;
+package model.elements;
 
 import java.awt.*;
 
 public abstract class GraphicElement {
     protected Color color;
-    protected float strokeWidth;
+    protected int strokeWidth;
 
-    public GraphicElement(Color color, float strokeWidth) {
+    public GraphicElement(Color color, int strokeWidth) {
         this.color = color;
         this.strokeWidth = strokeWidth;
     }

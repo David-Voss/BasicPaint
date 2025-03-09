@@ -9,6 +9,7 @@ public class BasicPaint {
     }
 
     private static void run() {
+        //DrawingModel model = new DrawingModel();
         MainWindow gui = new MainWindow();
         new MainController(gui);
     }

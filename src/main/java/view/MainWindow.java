@@ -1,9 +1,6 @@
 package view;
 
-import view.components.MenuBarView;
-import view.components.PaintingPanelView;
-import view.components.StatusBarView;
-import view.components.ToolBarView;
+import view.components.*;
 
 import javax.swing.*;
 import java.awt.*;

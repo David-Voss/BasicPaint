@@ -1,6 +1,6 @@
 package view.components;
 
-import controller.toolbox.CreateImageButton;
+import toolbox.CreateImageButton;
 
 import javax.swing.*;
 import java.awt.*;

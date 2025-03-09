@@ -1,13 +1,11 @@
 package model.elements;
 
-import model.GraphicElement;
-
 import java.awt.*;
 
 public class RectangleElement extends GraphicElement {
     private final int x, y, width, height;
 
-    public RectangleElement(int x, int y, int width, int height, Color color, float strokeWidth) {
+    public RectangleElement(int x, int y, int width, int height, Color color, int strokeWidth) {
         super(color, strokeWidth);
         this.x = x;
         this.y = y;
