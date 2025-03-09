@@ -20,8 +20,6 @@ public class PaintingModel {
 
     private int strokeWidth;
 
-    private PaintingTool currentTool;
-
     public PaintingModel() {
         // Standardgröße des Canvas, z.B. 800x600 Pixel.
         this(1700, 1700);
@@ -38,7 +36,6 @@ public class PaintingModel {
         previousColour = Color.BLACK;
         tempColour = Color.BLACK;
         strokeWidth = 3;
-        //g2d.fillRect(0, 0, width, height);
         g2d.setColor(currentColour);
         g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
     }
@@ -59,23 +56,6 @@ public class PaintingModel {
     public void setStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;
         g2d.setStroke(new BasicStroke(strokeWidth));
-    }
-
-    public void setTool(PaintingTool tool) {
-        this.currentTool = tool;
-        // If switching tools while drawing, end any current shape preview.
-        //this.isDragging = false;
-    }
-
-    public void colourChange() {
-        this.tempColour = this.previousColour;
-        this.previousColour = this.currentColour;
-    }
-
-    public void colourChangeBack() {
-        this.currentColour = this.previousColour;
-        this.previousColour = this.tempColour;
-        g2d.setColor(this.currentColour);
     }
 
     /**
