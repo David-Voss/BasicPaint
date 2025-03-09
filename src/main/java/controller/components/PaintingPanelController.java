@@ -179,6 +179,7 @@ public class PaintingPanelController {
         toolBarView.getPencilButton().addActionListener(e -> ensureFocus());
         toolBarView.getFillButton().addActionListener(e -> ensureFocus());
         toolBarView.getEraserButton().addActionListener(e -> ensureFocus());
+        toolBarView.getMagnifierButton().addActionListener(e -> ensureFocus());
 
         toolBarView.getLineButton().addActionListener(e -> ensureFocus());
         toolBarView.getEllipseButton().addActionListener(e -> ensureFocus());

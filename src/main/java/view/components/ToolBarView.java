@@ -17,6 +17,7 @@ public class ToolBarView extends JPanel {
     private final JToggleButton pencilButton;
     private final JToggleButton fillButton;
     private final JToggleButton eraserButton;
+    private final JToggleButton magnifierButton;
 
     private final JPanel paintingToolPanel;
     private final JToggleButton lineButton;
@@ -38,22 +39,23 @@ public class ToolBarView extends JPanel {
 
         addSeparator();
 
-        this.toolsPanel = new JPanel();
+        this.toolsPanel = new JPanel(new GridLayout(2,3,4,4));
         this.paintingToolButtonGroup = new ButtonGroup();
         this.pencilButton = CreateImageButton.createToggleButton("assets/icons/pencil-solid.png", "Bleistift [P]");
-
-        this.fillButton = CreateImageButton.createToggleButton("assets/icons/fill-drip-solid.png","Füllen [B]");
-
         this.pencilButton.setSelected(true);
+        this.fillButton = CreateImageButton.createToggleButton("assets/icons/fill-drip-solid.png","Füllen [B]");
         this.eraserButton = CreateImageButton.createToggleButton("assets/icons/eraser-solid.png", "Radierer [E]");
+        this.magnifierButton = CreateImageButton.createToggleButton("assets/icons/magnifying-glass-solid.png","Lupe [Z]");
 
         add(toolsPanel);
         paintingToolButtonGroup.add(pencilButton);
         paintingToolButtonGroup.add(fillButton);
         paintingToolButtonGroup.add(eraserButton);
+        paintingToolButtonGroup.add(magnifierButton);
         toolsPanel.add(pencilButton);
         toolsPanel.add(fillButton);
         toolsPanel.add(eraserButton);
+        toolsPanel.add(magnifierButton);
 
         addSeparator();
 
@@ -79,13 +81,17 @@ public class ToolBarView extends JPanel {
     }
 
     public JComboBox<String> getBrushSizeDropdown() { return brushSizeDropdown; }
+
     public ButtonGroup getPaintingToolButtonGroup() { return paintingToolButtonGroup; }
     public JToggleButton getPencilButton() { return pencilButton; }
     public JToggleButton getFillButton() { return fillButton; }
     public JToggleButton getEraserButton() { return eraserButton; }
+    public JToggleButton getMagnifierButton() { return magnifierButton; }
+
     public JToggleButton getLineButton() { return lineButton; }
     public JToggleButton getEllipseButton() { return ellipseButton; }
     public JToggleButton getRectangleButton() { return rectangleButton; }
+
     public JPanel getColourPanel() { return colourPanel; }
     public JColorChooser getColourChooser() { return colourChooser; }
     public Color getColour() { return colourChooser.getColor(); }
@@ -124,6 +130,7 @@ public class ToolBarView extends JPanel {
         if (pencilButton.isSelected()) return PaintingTool.PENCIL;
         if (fillButton.isSelected()) return PaintingTool.FILL;
         if (eraserButton.isSelected()) return PaintingTool.ERASER;
+        if (magnifierButton.isSelected()) return PaintingTool.MAGNIFIER;
         if (lineButton.isSelected()) return PaintingTool.LINE;
         if (ellipseButton.isSelected()) return PaintingTool.ELLIPSE;
         if (rectangleButton.isSelected()) return PaintingTool.RECTANGLE;

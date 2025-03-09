@@ -9,6 +9,8 @@ public enum PaintingTool {
     /** Tool for erasing content (draws with background colour to remove drawing). */
     ERASER,
 
+    MAGNIFIER,
+
     /** Tool for drawing a straight line. */
     LINE,
 
