@@ -68,8 +68,8 @@ public class PaintingModel {
      * @param y2 Endpunkt Y-Koordinate
      */
     public void drawLine(int x1, int y1, int x2, int y2) {
-        //Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(currentColour);
+        g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
         g2d.drawLine(x1, y1, x2, y2);
     }
 

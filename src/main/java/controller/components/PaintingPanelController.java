@@ -102,7 +102,10 @@ public class PaintingPanelController {
                 if (isPencilOrEraserSelected()) {
                     boolean isEraser = toolBarView.getEraserButton().isSelected();
                     paintingView.setPreviewPoint(e.getPoint(), isEraser);
-                    drawPoint(e.getX(), e.getY());
+                    if (startPoint != null) {
+                        freeDrawing(startPoint.x, startPoint.y, e.getX(), e.getY());
+                    }
+                    startPoint = e.getPoint(); // Startpunkt aktualisieren
                     paintingView.repaint();
                 }
                 else if (isDragging) {
@@ -115,7 +118,7 @@ public class PaintingPanelController {
                         switch (selectedTool) {
                             case PENCIL, ERASER:
                                 endPoint = e.getPoint();
-                                drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                                freeDrawing(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
                                 startPoint = endPoint;
                                 break;
                             case RECTANGLE:
@@ -237,7 +240,7 @@ public class PaintingPanelController {
                 paintingModel.getStrokeWidth());
     }
 
-    public void drawLine(int x1, int y1, int x2, int y2) {
+    public void freeDrawing(int x1, int y1, int x2, int y2) {
         if (!isPencilOrEraserSelected()) return;
         Graphics2D g2d = paintingModel.getG2D();
         eraserOrOtherToolColor();
