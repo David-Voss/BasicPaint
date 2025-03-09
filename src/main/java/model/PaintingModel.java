@@ -4,6 +4,9 @@ import toolbox.PaintingTool;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.awt.Point;
 
 public class PaintingModel {
     private BufferedImage canvas;
@@ -106,6 +109,7 @@ public class PaintingModel {
         int y = Math.min(y1, y2);
         int width = Math.abs(x2 - x1);
         int height = Math.abs(y2 - y1);
+        g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
         g2d.drawRect(x, y, width, height);
     }
 
@@ -127,6 +131,73 @@ public class PaintingModel {
         int height = Math.abs(y2 - y1);
         g2d.drawOval(x, y, width, height);
     }
+
+    public void floodFill(int x, int y, Color newColor, int baseTolerance) {
+        int targetColor = canvas.getRGB(x, y);
+        int replacementColor = newColor.getRGB();
+
+        if (targetColor == replacementColor) return;
+
+        Queue<Point> queue = new LinkedList<>();
+        queue.add(new Point(x, y));
+
+        while (!queue.isEmpty()) {
+            Point p = queue.poll();
+
+            if (p.x < 0 || p.x >= canvas.getWidth() || p.y < 0 || p.y >= canvas.getHeight()) continue;
+
+            int pixelColor = canvas.getRGB(p.x, p.y);
+
+            // Dynamische Toleranz-Anpassung für weichere Kanten
+            int adaptiveTolerance = adjustTolerance(pixelColor, targetColor, baseTolerance);
+            if (!colorWithinTolerance(pixelColor, targetColor, adaptiveTolerance)) continue;
+
+            // Setzt neue Farbe
+            canvas.setRGB(p.x, p.y, replacementColor);
+
+            // 4er-Nachbarschaft (besser für genauere Konturen)
+            queue.add(new Point(p.x + 1, p.y));
+            queue.add(new Point(p.x - 1, p.y));
+            queue.add(new Point(p.x, p.y + 1));
+            queue.add(new Point(p.x, p.y - 1));
+
+            // Falls diagonale Nachbarschaft nötig ist:
+            queue.add(new Point(p.x + 1, p.y + 1));
+            queue.add(new Point(p.x - 1, p.y - 1));
+            queue.add(new Point(p.x + 1, p.y - 1));
+            queue.add(new Point(p.x - 1, p.y + 1));
+        }
+    }
+
+    // Dynamische Anpassung der Toleranz für feinere Kantenerkennung
+    private int adjustTolerance(int color1, int color2, int baseTolerance) {
+        int difference = colorDifference(color1, color2);
+        return Math.max(baseTolerance - (difference / 10), 5);  // Mindesttoleranz 5
+    }
+
+    // Berechnet den Farbunterschied für bessere Kantenerkennung
+    private int colorDifference(int color1, int color2) {
+        Color c1 = new Color(color1, true);
+        Color c2 = new Color(color2, true);
+
+        return Math.abs(c1.getRed() - c2.getRed()) +
+                Math.abs(c1.getGreen() - c2.getGreen()) +
+                Math.abs(c1.getBlue() - c2.getBlue());
+    }
+
+
+    // Prüft, ob die Farbe innerhalb der Toleranz liegt
+    private boolean colorWithinTolerance(int color1, int color2, int tolerance) {
+        Color c1 = new Color(color1, true);
+        Color c2 = new Color(color2, true);
+
+        int rDiff = Math.abs(c1.getRed() - c2.getRed());
+        int gDiff = Math.abs(c1.getGreen() - c2.getGreen());
+        int bDiff = Math.abs(c1.getBlue() - c2.getBlue());
+
+        return (rDiff <= tolerance && gDiff <= tolerance && bDiff <= tolerance);
+    }
+
 
     /**
      * Löscht das gesamte Canvas, indem es mit der Hintergrundfarbe gefüllt wird.

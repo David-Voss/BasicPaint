@@ -4,6 +4,8 @@ public enum PaintingTool {
     /** Tool for drawing by hand. */
     PENCIL,
 
+    FILL,
+
     /** Tool for erasing content (draws with background colour to remove drawing). */
     ERASER,
 

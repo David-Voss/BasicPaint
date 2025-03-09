@@ -47,7 +47,12 @@ public class PaintingPanelController {
                 if (isPaintingToolSelected(PaintingTool.PENCIL) || isPaintingToolSelected(PaintingTool.ERASER)) {
                     drawPoint(e.getX(), e.getY());
                     paintingView.repaint();
-                } else if (SwingUtilities.isRightMouseButton(e) && !isPencilOrEraserSelected()) {
+                }
+                else if (toolBarView.getSelectedTool() == PaintingTool.FILL) {
+                    paintingModel.floodFill(e.getX(), e.getY(), paintingModel.getCurrentColour(), 30);
+                    paintingView.repaint();
+                }
+                else if (SwingUtilities.isRightMouseButton(e) && !isPencilOrEraserSelected()) {
                     System.out.println("Zeichnen abgebrochen (rechte Maustaste).");
                     cancelDrawing();
                     return; // Sofort beenden, nichts weiter tun
@@ -82,12 +87,25 @@ public class PaintingPanelController {
         });
 
         paintingView.addMouseMotionListener(new MouseAdapter() {
-            public void mouseDragged(MouseEvent e) {
-                if (isPencilOrEraserSelected() && !isPaintingToolSelected()) {
-
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                // Falls der Pencil oder Eraser aktiv ist, zeige eine Vorschau des Punktes
+                if (isPencilOrEraserSelected()) {
+                    boolean isEraser = toolBarView.getEraserButton().isSelected();
+                    paintingView.setPreviewPoint(e.getPoint(), isEraser);
+                } else {
+                    paintingView.clearPreviewPoint(); // Andernfalls keine Vorschau
                 }
+            }
 
-                if (isDragging) {
+            public void mouseDragged(MouseEvent e) {
+                if (isPencilOrEraserSelected()) {
+                    boolean isEraser = toolBarView.getEraserButton().isSelected();
+                    paintingView.setPreviewPoint(e.getPoint(), isEraser);
+                    drawPoint(e.getX(), e.getY());
+                    paintingView.repaint();
+                }
+                else if (isDragging) {
                     if (isPencilOrEraserSelected() || isPaintingToolSelected()) {
                         Point endPoint = e.getPoint();
                         PaintingTool selectedTool = toolBarView.getSelectedTool();
@@ -130,6 +148,13 @@ public class PaintingPanelController {
             }
         });
 
+        paintingView.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {
+                paintingView.clearPreviewPoint(); // Entfernt den Vorschaupunkt
+            }
+        });
+
         paintingView.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -147,11 +172,15 @@ public class PaintingPanelController {
             updateStrokeWidth();
             ensureFocus();
         });
+
         toolBarView.getPencilButton().addActionListener(e -> ensureFocus());
+        toolBarView.getFillButton().addActionListener(e -> ensureFocus());
         toolBarView.getEraserButton().addActionListener(e -> ensureFocus());
+
         toolBarView.getLineButton().addActionListener(e -> ensureFocus());
         toolBarView.getEllipseButton().addActionListener(e -> ensureFocus());
         toolBarView.getRectangleButton().addActionListener(e -> ensureFocus());
+
         toolBarView.getColourChooser().getSelectionModel().addChangeListener(e -> {
             changeColour();
             ensureFocus();

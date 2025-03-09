@@ -12,11 +12,13 @@ public class ToolBarView extends JPanel {
 
     private final JPanel toolsPanel;
 
+    private final ButtonGroup paintingToolButtonGroup;
+
     private final JToggleButton pencilButton;
+    private final JToggleButton fillButton;
     private final JToggleButton eraserButton;
 
     private final JPanel paintingToolPanel;
-    private final ButtonGroup paintingToolButtonGroup;
     private final JToggleButton lineButton;
     private final JToggleButton ellipseButton;
     private final JToggleButton rectangleButton;
@@ -40,13 +42,17 @@ public class ToolBarView extends JPanel {
         this.paintingToolButtonGroup = new ButtonGroup();
         this.pencilButton = CreateImageButton.createToggleButton("assets/icons/pencil-solid.png", "Bleistift [P]");
 
+        this.fillButton = CreateImageButton.createToggleButton("assets/icons/fill-drip-solid.png","Füllen [B]");
+
         this.pencilButton.setSelected(true);
         this.eraserButton = CreateImageButton.createToggleButton("assets/icons/eraser-solid.png", "Radierer [E]");
 
         add(toolsPanel);
         paintingToolButtonGroup.add(pencilButton);
+        paintingToolButtonGroup.add(fillButton);
         paintingToolButtonGroup.add(eraserButton);
         toolsPanel.add(pencilButton);
+        toolsPanel.add(fillButton);
         toolsPanel.add(eraserButton);
 
         addSeparator();
@@ -75,6 +81,7 @@ public class ToolBarView extends JPanel {
     public JComboBox<String> getBrushSizeDropdown() { return brushSizeDropdown; }
     public ButtonGroup getPaintingToolButtonGroup() { return paintingToolButtonGroup; }
     public JToggleButton getPencilButton() { return pencilButton; }
+    public JToggleButton getFillButton() { return fillButton; }
     public JToggleButton getEraserButton() { return eraserButton; }
     public JToggleButton getLineButton() { return lineButton; }
     public JToggleButton getEllipseButton() { return ellipseButton; }
@@ -115,8 +122,9 @@ public class ToolBarView extends JPanel {
         if (pencilButton.isSelected() && rectangleButton.isSelected()) return PaintingTool.RECTANGLE;
 
         if (pencilButton.isSelected()) return PaintingTool.PENCIL;
-        if (lineButton.isSelected()) return PaintingTool.LINE;
+        if (fillButton.isSelected()) return PaintingTool.FILL;
         if (eraserButton.isSelected()) return PaintingTool.ERASER;
+        if (lineButton.isSelected()) return PaintingTool.LINE;
         if (ellipseButton.isSelected()) return PaintingTool.ELLIPSE;
         if (rectangleButton.isSelected()) return PaintingTool.RECTANGLE;
         return null;

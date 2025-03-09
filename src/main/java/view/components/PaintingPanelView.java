@@ -4,11 +4,16 @@ import model.PaintingModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 
 public class PaintingPanelView extends JPanel {
     private PaintingModel paintingModel;
 
     private Shape previewShape = null;
+    private Point previewPoint = null;
+
+    private boolean isPreviewEraser = false; // Speichert, ob Vorschau für Eraser ist
 
     public PaintingPanelView(int width, int height) {
         paintingModel = new PaintingModel(width, height);
@@ -41,6 +46,17 @@ public class PaintingPanelView extends JPanel {
         repaint();
     }
 
+    public void setPreviewPoint(Point p, boolean isEraser) {
+        this.previewPoint = p;
+        this.isPreviewEraser = isEraser; // Speichert, ob Eraser aktiv ist
+        repaint();
+    }
+
+    public void clearPreviewPoint() {
+        this.previewPoint = null;
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -49,10 +65,26 @@ public class PaintingPanelView extends JPanel {
         // Falls eine Vorschau-Form existiert, zeichnen wir sie als gestrichelte Linie
         if (previewShape != null) {
             Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setColor(paintingModel.getCurrentColour()); // Vorschau-Farbe
-            float[] dashPattern = {5, 5}; // Gestrichelte Linie
-            g2d.setStroke(new BasicStroke(paintingModel.getStrokeWidth(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10, dashPattern, 0));
+            g2d.setColor(paintingModel.getCurrentColour());
+            if (previewShape instanceof Rectangle2D || previewShape instanceof Line2D) {
+                g2d.setStroke(new BasicStroke(paintingModel.getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            } else {
+                g2d.setStroke(new BasicStroke(paintingModel.getStrokeWidth(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            }
             g2d.draw(previewShape);
+            g2d.dispose();
+        }
+        if (previewPoint != null) {
+            Graphics2D g2d = (Graphics2D) g.create();
+
+            if (isPreviewEraser) {
+                g2d.setColor(paintingModel.getBackgroundColour()); // Falls Eraser aktiv, ist die Vorschau weiß
+            } else {
+                g2d.setColor(paintingModel.getCurrentColour()); // Sonst normale Farbe
+            }
+
+            int size = paintingModel.getStrokeWidth();
+            g2d.fillOval(previewPoint.x - size / 2, previewPoint.y - size / 2, size, size);
             g2d.dispose();
         }
     }
