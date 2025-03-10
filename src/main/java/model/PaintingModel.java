@@ -22,13 +22,13 @@ public class PaintingModel {
 
     public PaintingModel() {
         // Standardgröße des Canvas, z.B. 800x600 Pixel.
-        this(1700, 1700);
+        this(1247, 1247);
     }
 
     public PaintingModel(int width, int height) {
         canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         g2d = canvas.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        //g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         backgroundColour = Color.WHITE;
         clearCanvas();
 

@@ -16,7 +16,7 @@ public class MainWindow extends JFrame {
         super("BasicPaint");
         //setLookAndFeel();
         setStartingSize();
-        setMinimumSize(new Dimension(700, 500));
+        setMinimumSize(new Dimension(1000, 500));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         centerWindow();
         setLayout(new BorderLayout());
@@ -27,7 +27,7 @@ public class MainWindow extends JFrame {
         this.toolBarView = new ToolBarView();
         add(toolBarView, BorderLayout.NORTH);
 
-        this.paintingPanelView = new PaintingPanelView(1700, 1700);
+        this.paintingPanelView = new PaintingPanelView(1247, 1247); // 33 x 33 cm
         JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setViewportView(paintingPanelView);
         add(scrollPane, BorderLayout.CENTER);
