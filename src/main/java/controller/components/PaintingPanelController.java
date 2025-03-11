@@ -1,5 +1,6 @@
 package controller.components;
 
+import controller.MainController;
 import toolbox.PaintingTool;
 import model.PaintingModel;
 import view.components.PaintingPanelView;
@@ -14,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 public class PaintingPanelController {
     private PaintingPanelView paintingView;
@@ -40,20 +42,39 @@ public class PaintingPanelController {
     private void initialiseListeners() {
         paintingView.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                if (!isDragging) {
+                    System.out.println(timeStamp() + ": Zeichenfläche wird bearbeitet. \n" +
+                            timeStamp() + ": Tool: " + toolBarView.getSelectedTool());
+                }
+
                 startPoint = e.getPoint();
                 isDragging = true;
                 isDrawingShape = true;
 
+                /*System.out.println(time + ": Zeichenfläche wird bearbeitet. \n" +
+                        time + ": Tool: " + toolBarView.getSelectedTool());*/
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    System.out.println(timeStamp() + ": Rechte Maustaste gedrückt.");
+                }
+
                 if (isPaintingToolSelected(PaintingTool.PENCIL) || isPaintingToolSelected(PaintingTool.ERASER)) {
-                    drawPoint(e.getX(), e.getY());
+                    if (paintingModel.getStrokeWidth() <= 2) {
+                        paintingModel.getG2D().fillRect(e.getX(), e.getY(), paintingModel.getStrokeWidth(), paintingModel.getStrokeWidth());
+                        System.out.println(timeStamp() + ": Punkt gesetzt.");
+                    } else {
+                        //drawPoint(e.getX(), e.getY());
+                        drawCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), paintingModel.getG2D());
+                        fillCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), paintingModel.getG2D());
+                        System.out.println(timeStamp() + ": Punkt gesetzt.");
+                    }
                     paintingView.repaint();
                 }
                 else if (toolBarView.getSelectedTool() == PaintingTool.FILL) {
                     paintingModel.floodFill(e.getX(), e.getY(), paintingModel.getCurrentColour(), 30);
                     paintingView.repaint();
                 }
-                else if (SwingUtilities.isRightMouseButton(e) && !isPencilOrEraserSelected()) {
-                    System.out.println("Zeichnen abgebrochen (rechte Maustaste).");
+                else if (SwingUtilities.isRightMouseButton(e) /*&& !isPencilOrEraserSelected()*/) {
+                    System.out.println(timeStamp() + ": Zeichnen abgebrochen (rechte Maustaste). \n");
                     cancelDrawing();
                     return; // Sofort beenden, nichts weiter tun
                 }
@@ -68,21 +89,30 @@ public class PaintingPanelController {
                     switch (selectedTool) {
                         case RECTANGLE:
                             paintingModel.drawRectangle(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                            System.out.println(timeStamp() + ": Rechteck gezeichnet.");
                             break;
                         case ELLIPSE:
                             paintingModel.drawEllipse(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                            System.out.println(timeStamp() + ": Ellipse gezeichnet.");
                             break;
                         case LINE:
                             paintingModel.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                            System.out.println(timeStamp() + ": Linie gezeichnet.");
+                            break;
+                        case PENCIL:
+                            System.out.println(timeStamp() + ": Freies zeichnen.");
+                            break;
+                        case ERASER:
+                            System.out.println(timeStamp() + ": Radieren.");
                             break;
                         default:
                             break;
                     }
-
                     paintingView.clearPreviewShape();
                     paintingView.repaint();
                 }
                 isDragging = false;
+                System.out.println(timeStamp() + ": Bearbeitung beendet. \n");
             }
         });
 
@@ -102,10 +132,13 @@ public class PaintingPanelController {
                 if (isPencilOrEraserSelected()) {
                     boolean isEraser = toolBarView.getEraserButton().isSelected();
                     paintingView.setPreviewPoint(e.getPoint(), isEraser);
-                    if (startPoint != null) {
-                        freeDrawing(startPoint.x, startPoint.y, e.getX(), e.getY());
+
+                    if (startPoint == null) {  // Falls `startPoint` null ist, setze es neu
+                        startPoint = e.getPoint();
                     }
-                    startPoint = e.getPoint(); // Startpunkt aktualisieren
+
+                    freeDrawing(startPoint.x, startPoint.y, e.getX(), e.getY());
+                    startPoint = e.getPoint();
                     paintingView.repaint();
                 }
                 else if (isDragging) {
@@ -163,7 +196,7 @@ public class PaintingPanelController {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     if (isDragging || isDrawingShape) {  // Prüft beides: Linien & Formen
-                        System.out.println("Zeichnen abgebrochen (ESC gedrückt).");
+                        System.out.println(timeStamp() + ": Zeichnen abgebrochen (ESC).");
                         cancelDrawing();
                         e.consume(); // Verhindert, dass ESC andere Events auslöst
                     }
@@ -196,7 +229,7 @@ public class PaintingPanelController {
     }
 
     private void cancelDrawing() {
-        System.out.println("Zeichenvorgang abgebrochen.");
+        //System.out.println("Zeichenvorgang abgebrochen.");
         isDragging = false;
         isDrawingShape = false; // Form-Zeichnen abbrechen
         startPoint = null;
@@ -218,7 +251,7 @@ public class PaintingPanelController {
 
         if(selectedValue != null) {
             paintingModel.setStrokeWidth(Integer.parseInt(selectedValue.replace(" px", "")));
-            //System.out.println("Neue Pinselbreite: " + paintingModel.getStrokeWidth() + " px");
+            System.out.println(timeStamp() + ": Neue Pinselbreite: " + paintingModel.getStrokeWidth() + " px");
         }
     }
 
@@ -235,10 +268,56 @@ public class PaintingPanelController {
     public void drawPoint(int x, int y) {
         Graphics2D g2d = paintingModel.getG2D();
         eraserOrOtherToolColor();
-        g2d.fillOval(x - paintingModel.getStrokeWidth() / 2,
-                y - paintingModel.getStrokeWidth() / 2,
-                paintingModel.getStrokeWidth(),
-                paintingModel.getStrokeWidth());
+        int strokeWidth = paintingModel.getStrokeWidth();
+        if (strokeWidth == 1) {
+            g2d.fillRect(x, y, 1, 1);
+        } else {
+            g2d.fillOval(x - strokeWidth / 2,
+                    y - strokeWidth / 2,
+                    strokeWidth,
+                    strokeWidth);
+        }
+    }
+
+    public void fillCircle(int centerX, int centerY, int radius, Graphics2D g2d) {
+        if (toolBarView.getSelectedTool() == PaintingTool.ERASER) {
+            g2d.setColor(paintingModel.getBackgroundColour());
+        } else {
+            g2d.setColor(paintingModel.getCurrentColour());
+        }
+        for (int y = -radius; y <= radius; y++) {
+            for (int x = -radius; x <= radius; x++) {
+                if (x * x + y * y <= radius * radius) {
+                    g2d.fillRect(centerX + x, centerY + y, 1, 1);
+                }
+            }
+        }
+    }
+
+    public void drawCircle(int centerX, int centerY, int radius, Graphics2D g2d) {
+        int x = 0;
+        int y = radius;
+        int d = 3 - 2 * radius;
+
+        while (y >= x) {
+            // Setze die 8 symmetrischen Punkte für den Kreis
+            g2d.fillRect(centerX + x, centerY + y, 1, 1);
+            g2d.fillRect(centerX - x, centerY + y, 1, 1);
+            g2d.fillRect(centerX + x, centerY - y, 1, 1);
+            g2d.fillRect(centerX - x, centerY - y, 1, 1);
+            g2d.fillRect(centerX + y, centerY + x, 1, 1);
+            g2d.fillRect(centerX - y, centerY + x, 1, 1);
+            g2d.fillRect(centerX + y, centerY - x, 1, 1);
+            g2d.fillRect(centerX - y, centerY - x, 1, 1);
+
+            x++;
+            if (d > 0) {
+                y--;
+                d = d + 4 * (x - y) + 10;
+            } else {
+                d = d + 4 * x + 6;
+            }
+        }
     }
 
     public void freeDrawing(int x1, int y1, int x2, int y2) {
@@ -259,5 +338,9 @@ public class PaintingPanelController {
 
     private boolean isPaintingToolSelected(PaintingTool tool) {
         return toolBarView.getSelectedTool() == tool;
+    }
+
+    private String timeStamp() {
+        return MainController.time();
     }
 }

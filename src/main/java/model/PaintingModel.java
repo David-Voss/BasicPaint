@@ -1,10 +1,11 @@
 package model;
 
-import toolbox.PaintingTool;
+import controller.MainController;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.awt.Point;
 
@@ -13,8 +14,6 @@ public class PaintingModel {
     private Graphics2D g2d;
 
     private Color currentColour;
-    private Color previousColour;
-    private Color tempColour;
 
     private Color backgroundColour;
 
@@ -33,8 +32,6 @@ public class PaintingModel {
         clearCanvas();
 
         currentColour = Color.BLACK;
-        previousColour = Color.BLACK;
-        tempColour = Color.BLACK;
         strokeWidth = 3;
         g2d.setColor(currentColour);
         g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -43,10 +40,20 @@ public class PaintingModel {
     public BufferedImage getCanvas() { return canvas; }
     public Graphics2D getG2D() { return g2d; }
     public Color getCurrentColour() { return currentColour; }
-    public Color getPreviousColour() { return previousColour; }
-    public Color getTempColour() { return tempColour; }
     public Color getBackgroundColour() { return backgroundColour; }
     public int getStrokeWidth() { return strokeWidth; }
+
+    /**
+     * Replaces the current canvas image with a new image (for example, when loading a file).
+     * @param newImage the new BufferedImage to use as the canvas
+     */
+    public void setCanvas(BufferedImage newImage) {
+        this.canvas = newImage;
+        g2d = canvas.createGraphics();
+        // Resize the panel to fit new image if necessary.
+        //g2d.revalidate();
+        //g2d.repaint();
+    }
 
     public void setCurrentColour(Color colour) {
         //colourChange();
@@ -55,6 +62,9 @@ public class PaintingModel {
     }
     public void setStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;
+        if (g2d == null) {  // Falls `g2d` nicht existiert, neu erstellen
+            g2d = canvas.createGraphics();
+        }
         g2d.setStroke(new BasicStroke(strokeWidth));
     }
 
@@ -189,7 +199,22 @@ public class PaintingModel {
         Color oldColor = g2d.getColor();
         g2d.setColor(backgroundColour);
         g2d.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        g2d.dispose();
+        g2d = canvas.createGraphics();
         // ursprüngliche Farbe wiederherstellen
         g2d.setColor(oldColor);
+    }
+
+    public void showInitialPaintingModelValuesInConsole() {
+        System.out.println(timeStamp() + ": Initiale Werte PaintingModel:");
+        System.out.println(timeStamp() + ": Zeichenfläche Höhe = " + canvas.getHeight() + " px.");
+        System.out.println(timeStamp() + ": Zeichenfläche Breite = " + canvas.getWidth() + " px.");
+        System.out.println(timeStamp() + ": currentColour = " + getCurrentColour() + ".");
+        System.out.println(timeStamp() + ": backgroundColour = " + getBackgroundColour() + ".");
+        System.out.println(timeStamp() + ": strokeWidth = " + getStrokeWidth() + " px. \n");
+    }
+
+    private String timeStamp() {
+        return MainController.time();
     }
 }

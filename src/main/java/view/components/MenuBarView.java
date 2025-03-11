@@ -57,12 +57,12 @@ public class MenuBarView extends JMenuBar{
         addSeparator();
 
         this.menuBarToolBar = new JToolBar();
-        this.newFileButton = CreateImageButton.createButton("assets/icons/file-image-regular.png", "Neues Dokument erstellen");
-        this.openFileButton = CreateImageButton.createButton("assets/icons/folder-open-regular.png", "Datei öffnen");
-        this.saveFileButton = CreateImageButton.createButton("assets/icons/floppy-disk-regular.png", "Speichern");
-        this.printDocumentButton = CreateImageButton.createButton("assets/icons/print-solid.png", "Drucken");
-        this.undoButton = CreateImageButton.createButton("assets/icons/rotate-left-solid.png", "Rückgängig");
-        this.redoButton = CreateImageButton.createButton("assets/icons/rotate-right-solid.png", "Wiederherstellen");
+        this.newFileButton = CreateImageButton.createButton("assets/icons/file-image-regular.png", "Neues Bild erstellen [STRG + N]");
+        this.openFileButton = CreateImageButton.createButton("assets/icons/folder-open-regular.png", "Datei öffnen [STRG + O]");
+        this.saveFileButton = CreateImageButton.createButton("assets/icons/floppy-disk-regular.png", "Speichern [STRG + S]");
+        this.printDocumentButton = CreateImageButton.createButton("assets/icons/print-solid.png", "Drucken [STRG + P]");
+        this.undoButton = CreateImageButton.createButton("assets/icons/rotate-left-solid.png", "Rückgängig [STRG + Z]");
+        this.redoButton = CreateImageButton.createButton("assets/icons/rotate-right-solid.png", "Wiederherstellen [STRG + SHIFT + Z]");
 
 
         add(menuBarToolBar);

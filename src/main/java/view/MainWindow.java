@@ -13,13 +13,21 @@ public class MainWindow extends JFrame {
     StatusBarView statusBarView;
 
     public MainWindow() {
-        super("BasicPaint");
+        super("BasicPaint | Unbenannt");
         //setLookAndFeel();
         setStartingSize();
         setMinimumSize(new Dimension(1000, 500));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         centerWindow();
         setLayout(new BorderLayout());
+
+        setApplicationIcon();
+
+        /*ImageIcon icon = new ImageIcon("assets/icons/monkey-with-brush.png");
+        Image scaledIcon = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+        setIconImage(scaledIcon);*/
+
+        //setIconImage(new ImageIcon("assets/icons/application-icon-resized.png").getImage());
 
         this.menuBarView = new MenuBarView();
         setJMenuBar(menuBarView);
@@ -42,6 +50,7 @@ public class MainWindow extends JFrame {
     public ToolBarView getToolBarView() { return toolBarView; }
     public PaintingPanelView getPaintingPanelView() { return paintingPanelView; }
     public StatusBarView getStatusBarView() { return statusBarView; }
+    //public String getTitle() { return this.getTitle();}
 
     private void setLookAndFeel() {
         try {
@@ -70,4 +79,13 @@ public class MainWindow extends JFrame {
         int y = (screenSize.height - getHeight()) / 2;
         setLocation(x, y);
     }
+
+    private void setApplicationIcon() {
+        int maxSize = (System.getProperty("os.name").toLowerCase().contains("win")) ? 32 : 64;
+
+        ImageIcon icon = new ImageIcon("assets/icons/monkey-with-brush.png");
+        Image scaledIcon = icon.getImage().getScaledInstance(maxSize, maxSize, Image.SCALE_SMOOTH);
+        setIconImage(scaledIcon);
+    }
+
 }

@@ -1,15 +1,20 @@
 package controller;
 
 import controller.components.*;
+import toolbox.FileHandler;
 import view.MainWindow;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
 
 public class MainController implements ActionListener {
+
+    private FileHandler fileHandler;
 
     private final MainWindow mainWindow;
     private final MenuBarController menuBarController;
@@ -19,56 +24,40 @@ public class MainController implements ActionListener {
 
 
     public MainController(MainWindow mainWindow) {
+        this.fileHandler = new FileHandler();
+
         this.mainWindow = mainWindow;
-        this.menuBarController = new MenuBarController(mainWindow.getMenuBarView());
+        this.menuBarController = new MenuBarController(mainWindow, fileHandler);
         this.toolBarController = new ToolBarController(mainWindow.getToolBarView());
         this.paintingController = new PaintingPanelController(mainWindow.getPaintingPanelView(), mainWindow.getToolBarView());
         this.statusBarController = new StatusBarController(mainWindow.getStatusBarView());
 
-        initialiseShortcuts();
         initialiseListeners();
-    }
-
-    /**
-     * Sets up keyboard shortcuts for the application's menus.
-     */
-    public void initialiseShortcuts() {
-        // Shortcuts 'File' menu
-        mainWindow.getMenuBarView().getFileMenu().setMnemonic(KeyEvent.VK_D);
-        mainWindow.getMenuBarView().getNewFileItem().setAccelerator(KeyStroke.getKeyStroke('N', InputEvent.CTRL_DOWN_MASK));
-        mainWindow.getMenuBarView().getOpenFileItem().setAccelerator(KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
-        mainWindow.getMenuBarView().getSaveFileItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
-        mainWindow.getMenuBarView().getSaveFileAsItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-        mainWindow.getMenuBarView().getPrintDocumentItem().setAccelerator(KeyStroke.getKeyStroke('P', InputEvent.CTRL_DOWN_MASK));
-
-        // Shortcuts 'Edit' menu
-        mainWindow.getMenuBarView().getEditMenu().setMnemonic(KeyEvent.VK_B);
-        mainWindow.getMenuBarView().getUndoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK));
-        mainWindow.getMenuBarView().getRedoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        showInitialValuesInConsole();
     }
 
     /**
      * Registers action listeners for menu items and updates web search status.
      */
     private void initialiseListeners() {
-        // Register listeners for 'File' menu actions
-        addMenuAction(mainWindow.getMenuBarView().getNewFileItem(), "new");
-        addMenuAction(mainWindow.getMenuBarView().getOpenFileItem(), "open");
-        addMenuAction(mainWindow.getMenuBarView().getSaveFileItem(), "save");
-        addMenuAction(mainWindow.getMenuBarView().getSaveFileAsItem(), "save_as");
-        addMenuAction(mainWindow.getMenuBarView().getPrintDocumentItem(), "print");
+        // Add a window listener to prompt for unsaved changes on close.
+        mainWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.out.println(time() + ": windowClosing() aufgerufen.");
+                boolean canExit = menuBarController.confirmDiscardChanges();
+                if (!canExit) {
+                    // Falls der Benutzer "Abbrechen" gedrückt hat, NICHT schließen
+                    //System.out.print(" -> Schließen abgebrochen. \n");
+                    return;
+                }
 
-        // Register listeners for 'Edit' menu actions
-        addMenuAction(mainWindow.getMenuBarView().getUndoItem(), "undo");
-        addMenuAction(mainWindow.getMenuBarView().getRedoItem(), "redo");
-
-        // Register listeners for 'MenuBar-ToolBar-Buttons'
-        addMenuAction(mainWindow.getMenuBarView().getNewFileButton(), "new");
-        addMenuAction(mainWindow.getMenuBarView().getOpenFileButton(), "open");
-        addMenuAction(mainWindow.getMenuBarView().getSaveFileButton(), "save");
-        addMenuAction(mainWindow.getMenuBarView().getPrintDocumentButton(), "print");
-        addMenuAction(mainWindow.getMenuBarView().getUndoButton(), "undo");
-        addMenuAction(mainWindow.getMenuBarView().getRedoButton(), "redo");
+                // Falls der Benutzer "Ja" oder "Nein" gewählt hat, die Anwendung beenden
+                System.out.println(time() + ": Anwendung wird geschlossen.");
+                mainWindow.dispose();
+                System.exit(0);
+            }
+        });
     }
 
     /**
@@ -95,41 +84,52 @@ public class MainController implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String actionCommand = e.getActionCommand();
 
-        switch (actionCommand) {
-            // 'File' menu actions
-            case "new":
-                System.out.println("NEU");
-                //fileMenuManager.createNewFile();
-                break;
-            case "open":
-                System.out.println("ÖFFNEN");
-                //fileMenuManager.openFile();
-                break;
-            case "save":
-                System.out.println("SPEICHERN");
-                //fileMenuManager.saveFile();
-                break;
-            case "save_as":
-                System.out.println("SPEICHERN UNTER");
-                //fileMenuManager.saveFileAs();
-                break;
-            case "print":
-                System.out.println("DRUCKEN");
-                //fileMenuManager.printDocument();
-                break;
-            // 'Edit' menu actions
-            case "undo":
-                System.out.println("RÜCKGÄNGIG");
-                //editMenuManager.undo();
-                break;
-            case "redo":
-                System.out.println("WIEDERHERSTELLEN");
-                //editMenuManager.redo();
-                break;
-            default:
-                break;
-        }
+    }
+
+    public static String dateTime() {
+        Locale systemLocale = Locale.getDefault();
+        ZoneId systemTimeZone = ZoneId.systemDefault();
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(systemLocale);
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(systemLocale);
+
+        ZonedDateTime dateTimeNow = ZonedDateTime.now(systemTimeZone);
+        String dateTimeString = dateTimeNow.format(dateFormatter) + " " + dateTimeNow.format(timeFormatter);
+        return dateTimeString;
+    }
+
+    public static String date() {
+        Locale systemLocale = Locale.getDefault();
+        ZoneId systemTimeZone = ZoneId.systemDefault();
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(systemLocale);
+
+        ZonedDateTime dateTimeNow = ZonedDateTime.now(systemTimeZone);
+        String dateString = dateTimeNow.format(dateFormatter);
+        return dateString;
+    }
+
+    public static String time() {
+        Locale systemLocale = Locale.getDefault();
+        ZoneId systemTimeZone = ZoneId.systemDefault();
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.LONG).withLocale(systemLocale);
+
+        ZonedDateTime dateTimeNow = ZonedDateTime.now(systemTimeZone);
+        String timeString = dateTimeNow.format(timeFormatter);
+        return timeString;
+    }
+
+    private void showInitialValuesInConsole() {
+        System.out.println(date() + "\n" +
+                time() + ": BasicPaint gestartet. \n");
+
+        System.out.println(time() + ": Initiale Werte MainWindow:");
+        System.out.println(time() + ": MainWindow Höhe = " + mainWindow.getHeight() + " px.");
+        System.out.println(time() + ": MainWindow Breite = " + mainWindow.getWidth() + " px. \n");
+
+        mainWindow.getPaintingPanelView().getPaintingModel().showInitialPaintingModelValuesInConsole();
     }
 }
+
