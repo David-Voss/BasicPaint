@@ -15,9 +15,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * This class keeps track of the current file path for save operations.
  */
 public class FileHandler {
-    /** The current file associated with the drawing (opened or last saved). */
+
     private File currentFile;
-    //private FileChooserConfigurator chooserConfigurator;
 
     /**
      * Constructs a new FileHandler with no file initially associated.
@@ -35,9 +34,7 @@ public class FileHandler {
     public BufferedImage openImage(Component parent) {
         JFileChooser chooser = new JFileChooser();
         FileChooserConfigurator.configureFileChooser(chooser);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPEG Images (*.jpg, *.jpeg)", "jpg", "jpeg");
-        chooser.setFileFilter(filter);
-        chooser.setAcceptAllFileFilterUsed(false);
+
         int result = chooser.showOpenDialog(parent);
         if (result != JFileChooser.APPROVE_OPTION) {
             return null; // user cancelled
@@ -48,7 +45,8 @@ public class FileHandler {
             if (img == null) {
                 // If the file is not a known image type or corrupted, ImageIO may return null.
                 JOptionPane.showMessageDialog(parent,
-                        "Die ausgewählte Datei konnte nicht geöffnet werden. Möglicherweise wird das Format nicht unterstützt oder die Datei ist beschädigt.",
+                        "Die ausgewählte Datei konnte nicht geöffnet werden. \n" +
+                                "Möglicherweise wird das Format nicht unterstützt oder die Datei ist beschädigt.",
                         "Dateiöffnungsfehler",
                         JOptionPane.ERROR_MESSAGE);
                 return null;
@@ -76,7 +74,5 @@ public class FileHandler {
     /**
      * Resets the current file association (e.g., when starting a new drawing).
      */
-    public void resetFile() {
-        this.currentFile = null;
-    }
+    public void resetFile() { this.currentFile = null; }
 }

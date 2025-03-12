@@ -54,6 +54,21 @@ public class PaintingModel {
         //g2d.repaint();
     }
 
+    public void setCanvasSize(int width, int height) {
+        // 1️⃣ Neues BufferedImage mit neuer Größe erstellen
+        BufferedImage newCanvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        // 2️⃣ Altes Bild auf das neue Canvas übertragen
+        Graphics2D g2d = newCanvas.createGraphics();
+        g2d.setColor(backgroundColour);
+        g2d.fillRect(0,0, width, height);
+        g2d.drawImage(canvas, 0, 0, null);
+        g2d.dispose();
+
+        // 3️⃣ Neues Canvas im Model setzen
+        setCanvas(newCanvas);
+    }
+
     public void setCurrentColour(Color colour) {
         //colourChange();
         this.currentColour = colour;

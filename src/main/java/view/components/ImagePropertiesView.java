@@ -4,21 +4,41 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ImagePropertiesView extends JDialog {
+    private Label resolutionLabel;
     private JTextField widthField, heightField;
     private JRadioButton pixelButton, cmButton, inchButton;
-    private JButton okButton, cancelButton;
+    private JButton okButton, cancelButton, resetButton;
 
     public ImagePropertiesView(Frame parent) {
         super(parent, "Bildeigenschaften", true);
+
+        setPreferredSize(new Dimension(360,340));
+        setMinimumSize(new Dimension(265, 325));
+
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(4, 4, 4, 4);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
-        add(new JLabel("Auflösung: 96 DPI"), gbc);
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1;
+        add(new JLabel("Dateiattribute"), gbc);
 
         gbc.gridy++;
+        gbc. gridx = 0;
+        add(new Label("Auflösung:"), gbc);
+
+        gbc.gridx++;
+        this.resolutionLabel = new Label("96 DPI");
+        add(resolutionLabel, gbc);
+
+        gbc.gridx++;
+        add(new Label(" "), gbc);
+
+        gbc.gridx++;
+        add(new Label(" "), gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0; gbc.gridwidth = 4;
         add(new JSeparator(), gbc);
 
         gbc.gridy++; gbc.gridwidth = 1;
@@ -29,34 +49,65 @@ public class ImagePropertiesView extends JDialog {
         cmButton = new JRadioButton("Zentimeter");
         inchButton = new JRadioButton("Zoll");
 
+        pixelButton.setFont(pixelButton.getFont().deriveFont(Font.PLAIN));
+        cmButton.setFont(cmButton.getFont().deriveFont(Font.PLAIN));
+        inchButton.setFont(inchButton.getFont().deriveFont(Font.PLAIN));
+
         unitGroup.add(pixelButton);
         unitGroup.add(cmButton);
         unitGroup.add(inchButton);
 
         gbc.gridy++;
-        gbc.gridx = 0; add(pixelButton, gbc);
-        gbc.gridx = 1; add(cmButton, gbc);
-        gbc.gridy++; gbc.gridx = 1; add(inchButton, gbc);
+        gbc.insets = new Insets(1, 4, 1, 4);
+        add(pixelButton, gbc);
+        gbc.gridy++;
+        add(cmButton, gbc);
+        gbc.gridy++;
+        add(inchButton, gbc);
 
-        gbc.gridy++; gbc.gridx = 0;
-        add(new JLabel("Breite:"), gbc);
-        gbc.gridx = 1;
+        gbc.insets = new Insets(4, 4, 4, 4);
+
+        gbc.gridy++;
+        gbc.gridx = 0; gbc.gridwidth = 4;
+        add(new JSeparator(), gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        gbc.gridwidth = 1;
+        add(new Label("Breite:"), gbc);
+
+        gbc.gridx++;
+        add(new Label("Höhe:"), gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
         widthField = new JTextField(10);
         add(widthField, gbc);
 
-        gbc.gridy++; gbc.gridx = 0;
-        add(new JLabel("Höhe:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx++;
         heightField = new JTextField(10);
         add(heightField, gbc);
 
-        gbc.gridy++; gbc.gridx = 0;
-        okButton = new JButton("OK");
-        add(okButton, gbc);
+        // NEUER Standard-Button für das Zurücksetzen
+        gbc.gridx++; gbc.gridwidth = 2;
+        resetButton = new JButton("Standard");
+        add(resetButton, gbc);
 
-        gbc.gridx = 1;
+        gbc.gridy++;
+        gbc.gridx = 0; gbc.gridwidth = 4;
+        add(new JSeparator(), gbc);
+
+        gbc.gridy++;
+        gbc.gridx = 0;
+        JPanel buttonPanel = new JPanel(new GridLayout(1,2,4,4));
+
+        okButton = new JButton("OK");
+        buttonPanel.add(okButton, gbc);
+
         cancelButton = new JButton("Abbrechen");
-        add(cancelButton, gbc);
+        buttonPanel.add(cancelButton, gbc);
+
+        add(buttonPanel, gbc);
 
         pack();
         setLocationRelativeTo(parent);
@@ -69,4 +120,5 @@ public class ImagePropertiesView extends JDialog {
     public JRadioButton getInchButton() { return inchButton; }
     public JButton getOkButton() { return okButton; }
     public JButton getCancelButton() { return cancelButton; }
+    public JButton getResetButton() { return resetButton; } // Getter für neuen Button
 }

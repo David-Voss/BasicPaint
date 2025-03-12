@@ -1,9 +1,11 @@
 package model;
 
 public class ImagePropertiesModel {
+    private  int defaultWidth;
+    private int defaultHeight;
     private int width;  // Immer in Pixel gespeichert
     private int height;
-    private final int dpi;
+    private int dpi;
 
     public enum Unit {
         PIXEL, CM, INCH
@@ -12,10 +14,15 @@ public class ImagePropertiesModel {
     private Unit currentUnit = Unit.PIXEL;
 
     public ImagePropertiesModel(int width, int height, int dpi) {
+        this.defaultWidth = 1247;
+        this.defaultHeight = 1247;
         this.width = width;
         this.height = height;
         this.dpi = dpi;
     }
+
+    public int getDefaultWidth() {return defaultWidth; }
+    public int getDefaultHeight() { return defaultHeight; }
 
     public int getWidth() {
         return width;
@@ -51,6 +58,12 @@ public class ImagePropertiesModel {
         return convertPixelsToUnit(height, currentUnit);
     }
 
+    public void setSizeInPixels(int width, int height) {
+        this.width = width;
+        this.height = height;
+        this.currentUnit = Unit.PIXEL; // Immer als Pixel speichern
+    }
+
     /**
      * Setzt die Werte in der aktuellen Einheit und speichert sie als Pixel.
      */
@@ -83,14 +96,14 @@ public class ImagePropertiesModel {
     /**
      * Wandelt eine Einheit in Pixel um.
      */
-    private int convertUnitToPixels(double value, Unit unit) {
+    public int convertUnitToPixels(double value, Unit unit) {
         switch (unit) {
             case CM:
-                return (int) (value * (dpi / 2.54)); // Umrechnung cm → Pixel
+                return (int) Math.round(value * (dpi / 2.54)); // cm → Pixel
             case INCH:
-                return (int) (value * dpi); // Umrechnung Zoll → Pixel
+                return (int) Math.round(value * dpi); // Zoll → Pixel
             default:
-                return (int) value; // Pixel bleiben Pixel
+                return (int) value; // Pixel bleiben unverändert
         }
     }
 

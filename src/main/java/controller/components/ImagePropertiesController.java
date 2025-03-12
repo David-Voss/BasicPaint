@@ -33,6 +33,18 @@ public class ImagePropertiesController {
         view.getPixelButton().addActionListener(e -> changeUnit(ImagePropertiesModel.Unit.PIXEL));
         view.getCmButton().addActionListener(e -> changeUnit(ImagePropertiesModel.Unit.CM));
         view.getInchButton().addActionListener(e -> changeUnit(ImagePropertiesModel.Unit.INCH));
+
+        // Standard-Button setzt Werte zurück
+        view.getResetButton().addActionListener(e -> resetToDefault());
+    }
+
+    /**
+     * Setzt die Werte auf den Standardwert zurück (1247 x 1247 px).
+     */
+    private void resetToDefault() {
+        model.setSizeInPixels(model.getDefaultWidth(), model.getDefaultHeight());
+        model.setCurrentUnit(ImagePropertiesModel.Unit.PIXEL);
+        updateViewFields();
     }
 
     /**
@@ -70,17 +82,39 @@ public class ImagePropertiesController {
      * Ändert die Maßeinheit, konvertiert die Werte und aktualisiert das UI.
      */
     private void changeUnit(ImagePropertiesModel.Unit newUnit) {
-        model.convertToUnit(newUnit);
-        updateViewFields();
+        try {
+            // 1️⃣ Aktuelle Werte aus den Eingabefeldern holen (Komma zu Punkt ersetzen)
+            double currentWidth = Double.parseDouble(view.getWidthField().getText().replace(",", "."));
+            double currentHeight = Double.parseDouble(view.getHeightField().getText().replace(",", "."));
+
+            // 2️⃣ Aktuelle Einheit holen
+            ImagePropertiesModel.Unit currentUnit = model.getCurrentUnit();
+
+            // 3️⃣ Werte in Pixel umrechnen (immer auf ganze Zahlen runden!)
+            int pixelWidth = model.convertUnitToPixels(currentWidth, currentUnit);
+            int pixelHeight = model.convertUnitToPixels(currentHeight, currentUnit);
+
+            // 4️⃣ Pixelwerte im Modell speichern (verhindert Akkumulation von Rundungsfehlern)
+            model.setSizeInPixels(pixelWidth, pixelHeight);
+
+            // 5️⃣ Neue Einheit setzen und Werte konvertieren
+            model.convertToUnit(newUnit);
+
+            // 6️⃣ UI-Felder mit den umgerechneten Werten aktualisieren
+            updateViewFields();
+        } catch (NumberFormatException ignored) {
+            System.out.println("Ungültige Eingabe! Bitte nur Zahlen eingeben.");
+        }
     }
+
 
     /**
      * Speichert die neuen Werte in der aktuellen Einheit und konvertiert sie in Pixel.
      */
     private void updateSizeValues() {
         try {
-            double newWidth = Double.parseDouble(view.getWidthField().getText());
-            double newHeight = Double.parseDouble(view.getHeightField().getText());
+            double newWidth = Double.parseDouble(view.getWidthField().getText().replace(",", "."));
+            double newHeight = Double.parseDouble(view.getHeightField().getText().replace(",", "."));
 
             model.setSizeInCurrentUnit(newWidth, newHeight);
             model.convertToPixels(); // Speichert Werte immer als Pixel für interne Berechnungen

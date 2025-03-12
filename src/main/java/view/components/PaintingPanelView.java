@@ -26,6 +26,11 @@ public class PaintingPanelView extends JPanel {
     public JPanel getPaintingPanelView() { return this; }
     public PaintingModel getPaintingModel() { return paintingModel; }
 
+    public void setCanvasSize(int width, int height) {
+        paintingModel.setCanvasSize(width, height);
+        setPaintingPanelSize(width, height);
+    }
+
     public void setPaintingPanelSize(int width, int height) {
         setPreferredSize(new Dimension(width, height));
         revalidate(); // Aktualisiert das Layout-Management

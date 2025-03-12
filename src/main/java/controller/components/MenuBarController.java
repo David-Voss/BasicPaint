@@ -259,11 +259,93 @@ public class MenuBarController implements ActionListener {
     private void saveFileAs() {
         JFileChooser fileChooser = new JFileChooser();
         FileChooserConfigurator.configureFileChooser(fileChooser);
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Bilddateien (*.jpg / *.jpeg)", "jpg", "jpeg"));
 
         if (fileChooser.showSaveDialog(mainWindow) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             String fileName = selectedFile.getName().toLowerCase();
+
+            // 1️⃣ Standardmäßige Dateiendung bestimmen (basierend auf aktivem Filter)
+            String selectedExtension = "jpg"; // Standard: JPG
+            FileNameExtensionFilter selectedFilter = (FileNameExtensionFilter) fileChooser.getFileFilter();
+
+            if (selectedFilter.getDescription().contains("PNG")) {
+                selectedExtension = "png";
+            }
+
+            // 2️⃣ Falls keine Endung angegeben wurde, automatisch anhängen
+            if (!fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg") && !fileName.endsWith(".png")) {
+                selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + "." + selectedExtension);
+            }
+
+            this.currentFile = selectedFile;
+            writeFile(currentFile);
+        } else {
+            System.out.println(timeStamp() + ": Datei wurde nicht ausgewählt.");
+        }
+    }
+
+    private void writeFile(File file) {
+        try {
+            BufferedImage image = paintingModel.getCanvas();
+            if (image == null) {
+                System.out.println("Fehler: Das Bildobjekt ist null. Überprüfe paintingModel.getCanvas().");
+                return;
+            }
+
+            if (file.exists() && !file.canWrite()) {
+                System.out.println("Fehler: Die Datei ist schreibgeschützt oder von einem anderen Prozess gesperrt.");
+                return;
+            }
+
+            // 1️⃣ Dateiformat bestimmen (JPG oder PNG)
+            String format = "jpg"; // Standard ist JPG
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".png")) {
+                format = "png";
+            }
+
+            // 2️⃣ Datei speichern mit dem richtigen Format
+            boolean success = ImageIO.write(image, format, file);
+
+            if (!success) {
+                boolean secondTry = ImageIO.write(convertImage(image), format, file);
+
+                if (!success && !secondTry) throw new IOException("ImageIO.write() konnte das Bild nicht speichern.");
+            }
+
+            mainWindow.setTitle("BasicPaint | " + file.getName());
+            System.out.println(timeStamp() + ": Speichere Datei nach: " + file.getAbsolutePath());
+            hasUnsavedChanges = false;
+            System.out.println(timeStamp() + ": Änderungen gespeichert -> hasUnsavedChanges = false \n");
+
+        } catch (IOException e) {
+            System.out.print(timeStamp() + ": ");
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(mainWindow,
+                    "Fehler beim Speichern der Datei.\n" + e.getMessage(),
+                    "Fehler",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+
+    /*private void saveFileAs() {
+        JFileChooser fileChooser = new JFileChooser();
+        FileChooserConfigurator.configureFileChooser(fileChooser);
+        //fileChooser.setFileFilter(new FileNameExtensionFilter("Bilddateien (*.jpg / *.jpeg)", "jpg", "jpeg"));
+
+        if (fileChooser.showSaveDialog(mainWindow) == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            String fileName = selectedFile.getName().toLowerCase();
+
+            // 1️⃣ Standardmäßige Dateiendung bestimmen (basierend auf aktivem Filter)
+            String selectedExtension = "jpg"; // Standard: JPG
+            FileNameExtensionFilter selectedFilter = (FileNameExtensionFilter) fileChooser.getFileFilter();
+
+            if (selectedFilter.getDescription().contains("PNG")) {
+                selectedExtension = "png";
+            }
 
             if (!fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg")) {
                 File parentDirectory = selectedFile.getParentFile();
@@ -320,7 +402,7 @@ public class MenuBarController implements ActionListener {
                     "Fehler",
                     JOptionPane.ERROR_MESSAGE);
         }
-    }
+    }*/
 
     private BufferedImage convertImage(BufferedImage image) {
         BufferedImage formattedImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -364,17 +446,21 @@ public class MenuBarController implements ActionListener {
         controller.showDialog();
 
         if (controller.isConfirmed()) {
+            saveCanvasState();
+
             int newWidth = controller.getImageWidth();
             int newHeight = controller.getImageHeight();
 
-            mainWindow.getPaintingPanelView().setPaintingPanelSize(newWidth, newHeight);
-            System.out.println(timeStamp() + ": Neue Größe gesetzt: " + newWidth + "x" + newHeight);
+            mainWindow.getPaintingPanelView().setCanvasSize(newWidth, newHeight);
+            System.out.println(timeStamp() + ": Neue Größe gesetzt: " + newWidth + "x" + newHeight + "\n");
         }
     }
 
     private void undo() {
         if (!undoStack.isEmpty()) {
             redoStack.push(new CanvasState(copyImage(paintingModel.getCanvas()),
+                    paintingModel.getCanvas().getWidth(),
+                    paintingModel.getCanvas().getHeight(),
                     (currentFile != null) ? currentFile.getName() : "Unbenannt"));
 
             CanvasState previousState = undoStack.pop();
@@ -389,6 +475,8 @@ public class MenuBarController implements ActionListener {
     private void redo() {
         if (!redoStack.isEmpty()) {
             undoStack.push(new CanvasState(copyImage(paintingModel.getCanvas()),
+                    paintingModel.getCanvas().getWidth(),
+                    paintingModel.getCanvas().getHeight(),
                     (currentFile != null) ? currentFile.getName() : "Unbenannt"));
 
             CanvasState nextState = redoStack.pop();
@@ -402,13 +490,18 @@ public class MenuBarController implements ActionListener {
 
     private void saveCanvasState() {
         BufferedImage currentState = copyImage(paintingModel.getCanvas());
+        int currentWidth = paintingModel.getCanvas().getWidth();
+        int currentHeight = paintingModel.getCanvas().getHeight();
         String currentFileName = (currentFile != null) ? currentFile.getName() : "Unbenannt";
 
-        if (!undoStack.isEmpty() && imagesAreEqual(undoStack.peek().image, currentState)) {
-            return; // Falls sich nichts geändert hat, speichern wir nicht doppelt
+        // Falls sich nichts geändert hat, speichern wir nicht doppelt
+        if (!undoStack.isEmpty() && imagesAreEqual(undoStack.peek().image, currentState)
+                && undoStack.peek().width == currentWidth
+                && undoStack.peek().height == currentHeight) {
+            return;
         }
 
-        undoStack.push(new CanvasState(currentState, currentFileName));
+        undoStack.push(new CanvasState(currentState, currentWidth, currentHeight, currentFileName));
         redoStack.clear(); // Redo wird ungültig, sobald eine neue Aktion passiert
     }
 
@@ -477,10 +570,14 @@ public class MenuBarController implements ActionListener {
 
     private static class CanvasState {
         BufferedImage image;
+        int width;
+        int height;
         String fileName;
 
-        public CanvasState(BufferedImage image, String fileName) {
+        public CanvasState(BufferedImage image, int width, int height, String fileName) {
             this.image = image;
+            this.width = width;
+            this.height = height;
             this.fileName = fileName;
         }
     }
