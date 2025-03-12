@@ -23,19 +23,13 @@ public class MainWindow extends JFrame {
 
         setApplicationIcon();
 
-        /*ImageIcon icon = new ImageIcon("assets/icons/monkey-with-brush.png");
-        Image scaledIcon = icon.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
-        setIconImage(scaledIcon);*/
-
-        //setIconImage(new ImageIcon("assets/icons/application-icon-resized.png").getImage());
-
         this.menuBarView = new MenuBarView();
         setJMenuBar(menuBarView);
 
         this.toolBarView = new ToolBarView();
         add(toolBarView, BorderLayout.NORTH);
 
-        this.paintingPanelView = new PaintingPanelView(1247, 1247); // 33 x 33 cm
+        this.paintingPanelView = new PaintingPanelView(); // 33 x 33 cm
         JScrollPane scrollPane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setViewportView(paintingPanelView);
         add(scrollPane, BorderLayout.CENTER);
@@ -50,7 +44,6 @@ public class MainWindow extends JFrame {
     public ToolBarView getToolBarView() { return toolBarView; }
     public PaintingPanelView getPaintingPanelView() { return paintingPanelView; }
     public StatusBarView getStatusBarView() { return statusBarView; }
-    //public String getTitle() { return this.getTitle();}
 
     private void setLookAndFeel() {
         try {

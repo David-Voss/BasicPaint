@@ -10,24 +10,38 @@ import java.awt.geom.Rectangle2D;
 public class PaintingPanelView extends JPanel {
     private PaintingModel paintingModel;
 
+    Dimension paintingPanelDimension;
+
     private Shape previewShape = null;
     private Point previewPoint = null;
 
     private boolean isPreviewEraser = false; // Speichert, ob Vorschau für Eraser ist
 
-    public PaintingPanelView(int width, int height) {
-        paintingModel = new PaintingModel(width, height);
-        setPreferredSize(new Dimension(width, height));
+    public PaintingPanelView() {
+        this.paintingPanelDimension = new Dimension(1247, 1247);
+        paintingModel = new PaintingModel((int) paintingPanelDimension.getWidth(), (int) paintingPanelDimension.getHeight());
+        setPreferredSize(paintingPanelDimension);
     }
 
     public JPanel getPaintingPanelView() { return this; }
     public PaintingModel getPaintingModel() { return paintingModel; }
 
-    // 🔹 Setzt das Vorschau-Rechteck (Wird von Controller aktualisiert)
-    /*public void setPreviewRectangle(Rectangle rectangle) {
-        this.previewShape = rectangle;
-        repaint();
-    }*/
+    public void setPaintingPanelSize(int width, int height) {
+        setPreferredSize(new Dimension(width, height));
+        revalidate(); // Aktualisiert das Layout-Management
+        repaint(); // Zeichnet das Panel neu
+    }
+
+    public void resizePanelWhenOpenedFileIsWiderOrHigher(int width, int height) {
+        boolean isWider = width > this.getWidth();
+        boolean isHigher = height > this.getWidth();
+
+        if (isWider || isHigher) {
+            setPreferredSize(new Dimension(width, height));
+            revalidate(); // Aktualisiert das Layout-Management
+            repaint(); // Zeichnet das Panel neu
+        }
+    }
 
     /**
      * Setzt die Vorschau-Form während des Zeichnens.

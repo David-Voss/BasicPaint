@@ -14,6 +14,7 @@ public class MenuBarView extends JMenuBar{
     JMenuItem saveFileItem;
     JMenuItem saveFileAsItem;
     JMenuItem printDocumentItem;
+    JMenuItem imageProperties;
 
     // Edit menu and its items
     JMenu editMenu;
@@ -37,6 +38,7 @@ public class MenuBarView extends JMenuBar{
         this.saveFileItem = new JMenuItem("Speichern");
         this.saveFileAsItem = new JMenuItem("Speichern unter");
         this.printDocumentItem = new JMenuItem("Drucken");
+        this.imageProperties = new JMenuItem("Bildeigenschaften");
 
         add(fileMenu);
         fileMenu.add(newFileItem);
@@ -45,6 +47,8 @@ public class MenuBarView extends JMenuBar{
         fileMenu.add(saveFileAsItem);
         fileMenu.addSeparator();
         fileMenu.add(printDocumentItem);
+        fileMenu.addSeparator();
+        fileMenu.add(imageProperties);
 
         this.editMenu = new JMenu("Bearbeiten");
         this.undoItem = new JMenuItem("Rückgängig");
@@ -88,13 +92,14 @@ public class MenuBarView extends JMenuBar{
     public JMenuItem getSaveFileItem() { return saveFileItem; }
     public JMenuItem getSaveFileAsItem() { return saveFileAsItem; }
     public JMenuItem getPrintDocumentItem() { return printDocumentItem; }
+    public JMenuItem getImageProperties() { return imageProperties; }
 
     // Edit menu getter
     public JMenu getEditMenu() { return editMenu; }
     public JMenuItem getUndoItem() { return undoItem; }
     public JMenuItem getRedoItem() {  return redoItem; }
 
-    // ToolBar getter
+    // MenuBar-ToolBar getter
     public JButton getNewFileButton() { return newFileButton; }
     public JButton getOpenFileButton() { return openFileButton; }
     public JButton getSaveFileButton() { return saveFileButton; }

@@ -6,6 +6,7 @@ import toolbox.FileChooserConfigurator;
 import toolbox.FileHandler;
 import view.MainWindow;
 import view.components.MenuBarView;
+import view.components.PaintingPanelView;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -58,6 +59,7 @@ public class MenuBarController implements ActionListener {
         menuBar.getSaveFileItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
         menuBar.getSaveFileAsItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         menuBar.getPrintDocumentItem().setAccelerator(KeyStroke.getKeyStroke('P', InputEvent.CTRL_DOWN_MASK));
+        menuBar.getImageProperties().setAccelerator(KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
 
         // Shortcuts 'Edit' menu
         menuBar.getEditMenu().setMnemonic(KeyEvent.VK_B);
@@ -75,6 +77,7 @@ public class MenuBarController implements ActionListener {
         addMenuAction(menuBar.getSaveFileItem(), "save");
         addMenuAction(menuBar.getSaveFileAsItem(), "save_as");
         addMenuAction(menuBar.getPrintDocumentItem(), "print");
+        addMenuAction(menuBar.getImageProperties(), "image_properties");
 
         // Register listeners for 'Edit' menu actions
         addMenuAction(menuBar.getUndoItem(), "undo");
@@ -151,6 +154,10 @@ public class MenuBarController implements ActionListener {
                 System.out.println(timeStamp() + ": printPicture() aufgerufen.");
                 printPicture();
                 break;
+            case "image_properties":
+                System.out.println(timeStamp() + ": showImagePropertiesDialog() aufgerufen.");
+                showImagePropertiesDialog();
+                break;
             // 'Edit' menu actions
             case "undo":
                 System.out.println("timeStamp() + \": undo() aufgerufen. \n");
@@ -171,24 +178,6 @@ public class MenuBarController implements ActionListener {
         this.hasUnsavedChanges = bool;
         return this.hasUnsavedChanges;
     }
-
-    /**
-     * Begins a new drawing. If the current drawing is unsaved, asks the user for confirmation.
-     */
-    /*private void newFile() {
-        saveCanvasState();
-        if (confirmDiscardChanges()) {
-            // Clear the drawing panel for a new image.
-            mainWindow.getPaintingPanelView().getPaintingModel().clearCanvas();
-            fileHandler.resetFile();
-            hasUnsavedChanges = false;
-            // Update title to reflect a new untitled file.
-            mainWindow.setTitle("BasicPaint");
-            System.out.println(timeStamp() + ": Neues Bild erstellt. \n"+
-                    timeStamp() + ": Bild hat keine ungespeicherten Änderungen. \n" +
-                    timeStamp() + ": Neuer Bildtitel: " + mainWindow.getTitle() + "\n");
-        }
-    }*/
 
     private void newFile() {
         saveCanvasState();
@@ -219,9 +208,17 @@ public class MenuBarController implements ActionListener {
         if (confirmDiscardChanges()) {
             BufferedImage image = fileHandler.openImage(mainWindow);
             if (image != null) {
-                mainWindow.getPaintingPanelView().getPaintingModel().setCanvas(image);
-                mainWindow.getPaintingPanelView().revalidate();
-                mainWindow.getPaintingPanelView().repaint();
+                PaintingPanelView paintingPanel = mainWindow.getPaintingPanelView();
+                PaintingModel paintingModel = paintingPanel.getPaintingModel();
+
+                // Setze das geladene Bild auf das Canvas
+                paintingModel.setCanvas(image);
+
+                // Ändere die Größe des PaintingPanels auf die Bildgröße
+                paintingPanel.resizePanelWhenOpenedFileIsWiderOrHigher(image.getWidth(), image.getHeight());
+
+                paintingPanel.revalidate();
+                paintingPanel.repaint();
                 hasUnsavedChanges = false;
                 // Update frame title to show opened file name.
                 File openedFile = fileHandler.getFile();
@@ -278,7 +275,6 @@ public class MenuBarController implements ActionListener {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                //selectedFile = new File(selectedFile.getAbsolutePath() + ".jpg");
                 selectedFile = new File(parentDirectory, selectedFile.getName() + ".jpg");
             }
 
@@ -359,30 +355,22 @@ public class MenuBarController implements ActionListener {
         }
     }
 
-    /*private void undo() {
-        if (!undoStack.isEmpty()) {
-            redoStack.push(copyImage(paintingModel.getCanvas())); // Zustand für Redo speichern
-            paintingModel.setCanvas(undoStack.pop()); // Vorherigen Zustand wiederherstellen
-            mainWindow.getPaintingPanelView().repaint(); // GUI aktualisieren
+    public void showImagePropertiesDialog() {
+        PaintingModel paintingModel = mainWindow.getPaintingPanelView().getPaintingModel();
+        int currentWidth = paintingModel.getCanvas().getWidth();
+        int currentHeight = paintingModel.getCanvas().getHeight();
+
+        ImagePropertiesController controller = new ImagePropertiesController(mainWindow, currentWidth, currentHeight, 96);
+        controller.showDialog();
+
+        if (controller.isConfirmed()) {
+            int newWidth = controller.getImageWidth();
+            int newHeight = controller.getImageHeight();
+
+            mainWindow.getPaintingPanelView().setPaintingPanelSize(newWidth, newHeight);
+            System.out.println(timeStamp() + ": Neue Größe gesetzt: " + newWidth + "x" + newHeight);
         }
     }
-
-    private void redo() {
-        if (!redoStack.isEmpty()) {
-            undoStack.push(copyImage(paintingModel.getCanvas())); // Zustand für Undo speichern
-            paintingModel.setCanvas(redoStack.pop()); // Wiederherstellen
-            mainWindow.getPaintingPanelView().repaint(); // GUI aktualisieren
-        }
-    }*/
-
-    /*private void saveCanvasState() {
-        BufferedImage currentState = copyImage(paintingModel.getCanvas());
-        if (!undoStack.isEmpty() && imagesAreEqual(undoStack.peek(), currentState)) {
-            return; // Falls sich nichts geändert hat, speichern wir nicht doppelt
-        }
-        undoStack.push(currentState);
-        redoStack.clear(); // Redo wird ungültig, sobald eine neue Aktion passiert
-    }*/
 
     private void undo() {
         if (!undoStack.isEmpty()) {

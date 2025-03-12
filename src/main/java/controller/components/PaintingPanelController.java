@@ -70,7 +70,7 @@ public class PaintingPanelController {
                     paintingView.repaint();
                 }
                 else if (toolBarView.getSelectedTool() == PaintingTool.FILL) {
-                    paintingModel.floodFill(e.getX(), e.getY(), paintingModel.getCurrentColour(), 30);
+                    paintingModel.floodFill(paintingModel.getCanvas(),e.getX(), e.getY(), paintingModel.getCurrentColour(), 10);
                     paintingView.repaint();
                 }
                 else if (SwingUtilities.isRightMouseButton(e) /*&& !isPencilOrEraserSelected()*/) {
