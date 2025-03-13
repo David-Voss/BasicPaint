@@ -3,7 +3,7 @@ package toolbox;
 import javax.swing.*;
 import java.awt.*;
 
-public class CreateImageButton {
+public class CreateIcon {
 
     /**
      * Creates a button / toggle button with an icon and tooltip.

@@ -1,6 +1,6 @@
 package view.components;
 
-import toolbox.CreateImageButton;
+import toolbox.CreateIcon;
 import toolbox.PaintingTool;
 
 import javax.swing.*;
@@ -35,18 +35,18 @@ public class ToolBarView extends JPanel {
         this.brushSizeDropdown.setSelectedItem("3 px");
         //this.brushSizeDropdown.setEditable(true);
 
-        add(new JLabel("Pinsel: "));
+        add(new JLabel(CreateIcon.loadIcon("assets/icons/paintbrush-solid.png", 15, 15)));
         add(brushSizeDropdown);
 
         addSeparator();
 
         this.toolsPanel = new JPanel(new GridLayout(2,3,4,4));
         this.paintingToolButtonGroup = new ButtonGroup();
-        this.pencilButton = CreateImageButton.createToggleButton("assets/icons/pencil-solid.png", "Bleistift [P]");
+        this.pencilButton = CreateIcon.createToggleButton("assets/icons/pencil-solid.png", "Bleistift [P]");
         this.pencilButton.setSelected(true);
-        this.fillButton = CreateImageButton.createToggleButton("assets/icons/fill-drip-solid.png","Füllen [B]");
-        this.eraserButton = CreateImageButton.createToggleButton("assets/icons/eraser-solid.png", "Radierer [E]");
-        this.magnifierButton = CreateImageButton.createToggleButton("assets/icons/magnifying-glass-solid.png","Lupe [Z]");
+        this.fillButton = CreateIcon.createToggleButton("assets/icons/fill-drip-solid.png","Füllen [B]");
+        this.eraserButton = CreateIcon.createToggleButton("assets/icons/eraser-solid.png", "Radierer [E]");
+        this.magnifierButton = CreateIcon.createToggleButton("assets/icons/magnifying-glass-solid.png","Lupe [Z]");
 
         add(toolsPanel);
         paintingToolButtonGroup.add(pencilButton);
@@ -62,9 +62,9 @@ public class ToolBarView extends JPanel {
 
         this.paintingToolPanel = new JPanel();
 
-        this.lineButton = CreateImageButton.createToggleButton("assets/icons/line-regular.png", "Linie");
-        this.ellipseButton = CreateImageButton.createToggleButton("assets/icons/circle-regular.png","Ellipse");
-        this.rectangleButton = CreateImageButton.createToggleButton("assets/icons/square-full-regular.png", "Rechteck");
+        this.lineButton = CreateIcon.createToggleButton("assets/icons/line-regular.png", "Linie");
+        this.ellipseButton = CreateIcon.createToggleButton("assets/icons/circle-regular.png","Ellipse");
+        this.rectangleButton = CreateIcon.createToggleButton("assets/icons/square-full-regular.png", "Rechteck");
 
         add(paintingToolPanel);
         paintingToolButtonGroup.add(lineButton);

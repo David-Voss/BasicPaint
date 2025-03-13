@@ -1,6 +1,6 @@
 package view.components;
 
-import toolbox.CreateImageButton;
+import toolbox.CreateIcon;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,12 +61,12 @@ public class MenuBarView extends JMenuBar{
         addSeparator();
 
         this.menuBarToolBar = new JToolBar();
-        this.newFileButton = CreateImageButton.createButton("assets/icons/file-image-regular.png", "Neues Bild erstellen [STRG + N]");
-        this.openFileButton = CreateImageButton.createButton("assets/icons/folder-open-regular.png", "Datei öffnen [STRG + O]");
-        this.saveFileButton = CreateImageButton.createButton("assets/icons/floppy-disk-regular.png", "Speichern [STRG + S]");
-        this.printDocumentButton = CreateImageButton.createButton("assets/icons/print-solid.png", "Drucken [STRG + P]");
-        this.undoButton = CreateImageButton.createButton("assets/icons/rotate-left-solid.png", "Rückgängig [STRG + Z]");
-        this.redoButton = CreateImageButton.createButton("assets/icons/rotate-right-solid.png", "Wiederherstellen [STRG + SHIFT + Z]");
+        this.newFileButton = CreateIcon.createButton("assets/icons/file-image-regular.png", "Neues Bild erstellen [STRG + N]");
+        this.openFileButton = CreateIcon.createButton("assets/icons/folder-open-regular.png", "Datei öffnen [STRG + O]");
+        this.saveFileButton = CreateIcon.createButton("assets/icons/floppy-disk-regular.png", "Speichern [STRG + S]");
+        this.printDocumentButton = CreateIcon.createButton("assets/icons/print-solid.png", "Drucken [STRG + P]");
+        this.undoButton = CreateIcon.createButton("assets/icons/rotate-left-solid.png", "Rückgängig [STRG + Z]");
+        this.redoButton = CreateIcon.createButton("assets/icons/rotate-right-solid.png", "Wiederherstellen [STRG + SHIFT + Z]");
 
 
         add(menuBarToolBar);
