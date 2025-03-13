@@ -4,8 +4,6 @@ import model.ImagePropertiesModel;
 import view.components.ImagePropertiesView;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 public class ImagePropertiesController {
@@ -13,15 +11,24 @@ public class ImagePropertiesController {
     private final ImagePropertiesView view;
     private boolean confirmed = false;
 
-    public ImagePropertiesController(Frame parent, int width, int height, int dpi, File imageFile) {
-        model = new ImagePropertiesModel(width, height, dpi, imageFile);
+    public ImagePropertiesController(Frame parent, int width, int height, File imageFile) {
+
         view = new ImagePropertiesView(parent);
+
+        int initialDpi = getSelectedDpiFromComboBox();
+        model = new ImagePropertiesModel(width, height, initialDpi, imageFile);
 
         view.updateFileInfo(model.getLastModifiedDate(), model.getFileSize());
 
 
         // Setze Startwerte
         updateViewFields();
+
+        view.getDpiComboBox().addActionListener(e -> {
+            updateDpiAndRecalculate();
+            view.revalidate();
+            view.repaint();
+        });
 
         // OK-Button speichert die Werte
         view.getOkButton().addActionListener(e -> {
@@ -40,6 +47,19 @@ public class ImagePropertiesController {
 
         // Standard-Button setzt Werte zurück
         view.getResetButton().addActionListener(e -> resetToDefault());
+    }
+
+    private int getSelectedDpiFromComboBox() {
+        try {
+            return Integer.parseInt(view.getDpiComboBox().getSelectedItem().toString());
+        } catch (NumberFormatException e) {
+            return 96;
+        }
+    }
+
+    private void updateDpiAndRecalculate() {
+        model.setDpi(getSelectedDpiFromComboBox());
+        updateViewFields();
     }
 
     /**

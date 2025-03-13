@@ -29,26 +29,11 @@ public class ImagePropertiesModel {
 
     public int getDefaultWidth() {return defaultWidth; }
     public int getDefaultHeight() { return defaultHeight; }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int getDpi() {
-        return dpi;
-    }
-
-    public Unit getCurrentUnit() {
-        return currentUnit;
-    }
-
-    public void setCurrentUnit(Unit unit) {
-        this.currentUnit = unit;
-    }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+    public int getDpi() { return dpi; }
+    public Unit getCurrentUnit() { return currentUnit; }
+    public void setCurrentUnit(Unit unit) { this.currentUnit = unit; }
 
     /**
      * Gibt die Breite in der aktuellen Einheit zurück.
@@ -62,6 +47,12 @@ public class ImagePropertiesModel {
      */
     public double getHeightInCurrentUnit() {
         return convertPixelsToUnit(height, currentUnit);
+    }
+
+    public void setDpi(int dpi) {
+        if (dpi > 0) {
+            this.dpi = dpi;
+        }
     }
 
     public void setSizeInPixels(int width, int height) {

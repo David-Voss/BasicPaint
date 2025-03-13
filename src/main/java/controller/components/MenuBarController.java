@@ -366,7 +366,7 @@ public class MenuBarController implements ActionListener {
         int currentWidth = paintingModel.getCanvas().getWidth();
         int currentHeight = paintingModel.getCanvas().getHeight();
 
-        ImagePropertiesController controller = new ImagePropertiesController(mainWindow, currentWidth, currentHeight, 96, currentFile);
+        ImagePropertiesController controller = new ImagePropertiesController(mainWindow, currentWidth, currentHeight, currentFile);
         controller.showDialog();
 
         if (controller.isConfirmed()) {

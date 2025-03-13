@@ -2,9 +2,11 @@ package view.components;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class ImagePropertiesView extends JDialog {
-    private Label resolutionLabel;
+    private JComboBox<String> dpiComboBox;
     private Label lastModifiedLabel;
     private Label fileSizeLabel;
     private JTextField widthField, heightField;
@@ -14,8 +16,9 @@ public class ImagePropertiesView extends JDialog {
     public ImagePropertiesView(Frame parent) {
         super(parent, "Bildeigenschaften", true);
 
-        setPreferredSize(new Dimension(360,340));
-        setMinimumSize(new Dimension(265, 325));
+        setPreferredSize(new Dimension(475,435));
+        setMinimumSize(new Dimension(475,435));
+        setMaximumSize(new Dimension(475,435));
 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -24,13 +27,6 @@ public class ImagePropertiesView extends JDialog {
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1;
         add(new JLabel("Dateiattribute"), gbc);
-
-        gbc.gridy++;
-        gbc. gridx = 0;
-        add(new Label("Auflösung:"), gbc);
-        gbc.gridx++;
-        this.resolutionLabel = new Label("96 DPI");
-        add(resolutionLabel, gbc);
 
         gbc.gridy++;
         gbc.gridx = 0;
@@ -87,6 +83,22 @@ public class ImagePropertiesView extends JDialog {
         add(new JSeparator(), gbc);
 
         gbc.gridy++;
+        gbc.gridx = 0; gbc.gridwidth = 1;
+        add(new Label("Auflösung:"), gbc);
+
+        gbc.gridx++;
+        JPanel comboBoxPanel = new JPanel();
+        String[] dpiOptions = {"72", "96", "150", "300", "600", "1200"};
+        dpiComboBox = new JComboBox<>(dpiOptions);
+        dpiComboBox.setEditable(true); // Benutzer kann eigene Werte eingeben
+        dpiComboBox.setSelectedItem("96");
+        dpiComboBox.setToolTipText("Wähle die DPI (Dots per Inch) zur korrekten Berechnung der Bildgröße in cm / in. \n" +
+                "[Standardeinstellung = 96 DPI]");
+        comboBoxPanel.add(dpiComboBox);
+        comboBoxPanel.add(new Label("DPI"));
+        add(comboBoxPanel, gbc);
+
+        gbc.gridy++;
         gbc.gridx = 0;
         gbc.gridwidth = 1;
         add(new Label("Breite:"), gbc);
@@ -128,6 +140,7 @@ public class ImagePropertiesView extends JDialog {
         setLocationRelativeTo(parent);
     }
 
+    public JComboBox<String> getDpiComboBox() { return dpiComboBox; }
     public JTextField getWidthField() { return widthField; }
     public JTextField getHeightField() { return heightField; }
     public JRadioButton getPixelButton() { return pixelButton; }
@@ -135,7 +148,7 @@ public class ImagePropertiesView extends JDialog {
     public JRadioButton getInchButton() { return inchButton; }
     public JButton getOkButton() { return okButton; }
     public JButton getCancelButton() { return cancelButton; }
-    public JButton getResetButton() { return resetButton; }// Getter für neuen Button
+    public JButton getResetButton() { return resetButton; }
 
     public void updateFileInfo(String lastModified, String fileSize) {
         lastModifiedLabel.setText(lastModified);
