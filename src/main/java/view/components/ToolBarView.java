@@ -33,9 +33,12 @@ public class ToolBarView extends JPanel {
 
         this.brushSizeDropdown = new JComboBox<>(new String[]{"1 px", "2 px", "3 px", "5 px", "10 px", "20 px", "30 px", "50 px", "100 px", "150 px", "200 px", "250 px"});
         this.brushSizeDropdown.setSelectedItem("3 px");
+        this.brushSizeDropdown.setToolTipText("Strichstärke");
         //this.brushSizeDropdown.setEditable(true);
 
-        add(new JLabel(CreateIcon.loadIcon("assets/icons/paintbrush-solid.png", 15, 15)));
+        add(new JLabel(CreateIcon.loadIcon("assets/icons/pencil-solid.png", 15, 15)));
+        add(new JLabel(" / "));
+        add(new JLabel(CreateIcon.loadIcon("assets/icons/eraser-solid.png",15,15)));
         add(brushSizeDropdown);
 
         addSeparator();
