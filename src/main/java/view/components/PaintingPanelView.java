@@ -26,28 +26,6 @@ public class PaintingPanelView extends JPanel {
     public JPanel getPaintingPanelView() { return this; }
     public PaintingModel getPaintingModel() { return paintingModel; }
 
-    public void setCanvasSize(int width, int height) {
-        paintingModel.setCanvasSize(width, height);
-        setPaintingPanelSize(width, height);
-    }
-
-    public void setPaintingPanelSize(int width, int height) {
-        setPreferredSize(new Dimension(width, height));
-        revalidate(); // Aktualisiert das Layout-Management
-        repaint(); // Zeichnet das Panel neu
-    }
-
-    public void resizePanelWhenOpenedFileIsWiderOrHigher(int width, int height) {
-        boolean isWider = width > this.getWidth();
-        boolean isHigher = height > this.getWidth();
-
-        if (isWider || isHigher) {
-            setPreferredSize(new Dimension(width, height));
-            revalidate(); // Aktualisiert das Layout-Management
-            repaint(); // Zeichnet das Panel neu
-        }
-    }
-
     /**
      * Setzt die Vorschau-Form während des Zeichnens.
      * @param shape Die gezeichnete Vorschau-Form (Linie, Rechteck oder Ellipse)

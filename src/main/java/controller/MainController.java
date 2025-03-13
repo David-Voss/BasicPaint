@@ -27,14 +27,17 @@ public class MainController implements ActionListener {
         this.fileHandler = new FileHandler();
 
         this.mainWindow = mainWindow;
-        this.menuBarController = new MenuBarController(mainWindow, fileHandler);
+        this.menuBarController = new MenuBarController(mainWindow, this, fileHandler);
         this.toolBarController = new ToolBarController(mainWindow.getToolBarView());
-        this.paintingController = new PaintingPanelController(mainWindow.getPaintingPanelView(), mainWindow.getToolBarView());
-        this.statusBarController = new StatusBarController(mainWindow.getStatusBarView());
+        this.paintingController = new PaintingPanelController(mainWindow, this);
+        this.statusBarController = new StatusBarController(mainWindow, this);
 
         initialiseListeners();
         showInitialValuesInConsole();
     }
+
+    public PaintingPanelController getPaintingPanelController() { return paintingController; }
+    public StatusBarController getStatusBarController() { return statusBarController; }
 
     /**
      * Registers action listeners for menu items and updates web search status.

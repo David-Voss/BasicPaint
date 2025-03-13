@@ -23,6 +23,7 @@ import java.util.Stack;
 
 public class MenuBarController implements ActionListener {
     private MainWindow mainWindow;
+    private MainController mainController;
     private MenuBarView menuBar;
     private PaintingModel paintingModel;
 
@@ -35,8 +36,9 @@ public class MenuBarController implements ActionListener {
     private Stack<CanvasState> undoStack = new Stack<>();
     private Stack<CanvasState> redoStack = new Stack<>();
 
-    public MenuBarController(MainWindow mainWindow, FileHandler fileHandler) {
+    public MenuBarController(MainWindow mainWindow, MainController mainController, FileHandler fileHandler) {
         this.mainWindow = mainWindow;
+        this.mainController = mainController;
         this.menuBar = mainWindow.getMenuBarView();
         this.paintingModel = mainWindow.getPaintingPanelView().getPaintingModel();
 
@@ -216,7 +218,7 @@ public class MenuBarController implements ActionListener {
                 paintingModel.setCanvas(image);
 
                 // Ändere die Größe des PaintingPanels auf die Bildgröße
-                paintingPanel.resizePanelWhenOpenedFileIsWiderOrHigher(image.getWidth(), image.getHeight());
+                mainController.getPaintingPanelController().resizePanelWhenOpenedFileIsWiderOrHigher(image.getWidth(), image.getHeight());
 
                 paintingPanel.revalidate();
                 paintingPanel.repaint();
@@ -238,6 +240,9 @@ public class MenuBarController implements ActionListener {
                 System.out.println(timeStamp() + ": Keine Datei gewählt. \n" +
                         timeStamp() + ": currentFile = " + currentFile.getName() + ". \n");
             }
+            int newWidth = mainWindow.getPaintingPanelView().getPaintingModel().getCanvas().getWidth();
+            int newHeight = mainWindow.getPaintingPanelView().getPaintingModel().getCanvas().getHeight();
+            mainController.getStatusBarController().updateImageSize(newWidth, newHeight);
         }
     }
 
@@ -376,7 +381,7 @@ public class MenuBarController implements ActionListener {
             int newWidth = controller.getImageWidth();
             int newHeight = controller.getImageHeight();
 
-            mainWindow.getPaintingPanelView().setCanvasSize(newWidth, newHeight);
+            mainController.getPaintingPanelController().setCanvasSize(newWidth, newHeight);
             System.out.println(timeStamp() + ": Neue Größe gesetzt: " + newWidth + "x" + newHeight + "\n");
         }
     }

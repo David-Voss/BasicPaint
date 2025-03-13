@@ -5,7 +5,7 @@ import java.awt.*;
 
 public class StatusBarView extends JPanel {
     private final JLabel mousePositionLabel;
-    private final JLabel selectionSizeLabel;
+    //private final JLabel selectionSizeLabel;
     private final JLabel imageSizeLabel;
     private final JComboBox<String> zoomDropdown;
     private final JButton zoomOutButton;
@@ -21,16 +21,18 @@ public class StatusBarView extends JPanel {
         // 🔹 Linke Seite: Mausposition
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         mousePositionLabel = new JLabel("X: 0, Y: 0");
+        mousePositionLabel.setToolTipText("Position des Mauszeigers.");
         leftPanel.add(mousePositionLabel);
 
         // 🔹 Neue Mitte: Auswahlgröße & Bildgröße
         JPanel combinedCenterPanel = new JPanel(new GridLayout(1, 2, 20, 0)); // 2 Spalten, Abstand 20px
-        selectionSizeLabel = new JLabel("Keine Auswahl");
-        selectionSizeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        //selectionSizeLabel = new JLabel("Keine Auswahl");
+        //selectionSizeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageSizeLabel = new JLabel("0 × 0 px");
+        imageSizeLabel.setToolTipText("Aktuelle Größe der Zeichenfläche in Pixeln");
         imageSizeLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        combinedCenterPanel.add(selectionSizeLabel);
+        //combinedCenterPanel.add(selectionSizeLabel);
         combinedCenterPanel.add(imageSizeLabel);
 
         // 🔹 Rechte Seite: Zoom-Steuerung
@@ -61,7 +63,7 @@ public class StatusBarView extends JPanel {
 
     // Getter-Methoden für späteren Controller-Zugriff
     public JLabel getMousePositionLabel() { return mousePositionLabel; }
-    public JLabel getSelectionSizeLabel() { return selectionSizeLabel; }
+    //public JLabel getSelectionSizeLabel() { return selectionSizeLabel; }
     public JLabel getImageSizeLabel() { return imageSizeLabel; }
     public JComboBox<String> getZoomDropdown() { return zoomDropdown; }
     public JButton getZoomOutButton() { return zoomOutButton; }

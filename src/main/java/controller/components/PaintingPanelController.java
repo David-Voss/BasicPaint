@@ -3,6 +3,7 @@ package controller.components;
 import controller.MainController;
 import toolbox.PaintingTool;
 import model.PaintingModel;
+import view.MainWindow;
 import view.components.PaintingPanelView;
 import view.components.ToolBarView;
 
@@ -18,9 +19,12 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 public class PaintingPanelController {
+    MainWindow mainWindow;
+    MainController mainController;
     private PaintingPanelView paintingView;
     private PaintingModel paintingModel;
     private ToolBarView toolBarView;
+
 
 
     private Point startPoint;
@@ -28,10 +32,12 @@ public class PaintingPanelController {
     private boolean isDragging = false;
     private boolean isDrawingShape = false; // Neue Variable für Form-Zeichnen
 
-    public PaintingPanelController(PaintingPanelView paintingView, ToolBarView toolBarView) {
-        this.paintingView = paintingView;
+    public PaintingPanelController(MainWindow mainWindow, MainController mainController) {
+        this.mainWindow = mainWindow;
+        this.mainController = mainController;
+        this.paintingView = mainWindow.getPaintingPanelView();
         this.paintingModel = paintingView.getPaintingModel();
-        this.toolBarView = toolBarView;
+        this.toolBarView = mainWindow.getToolBarView();
 
         paintingView.setFocusable(true);
         paintingView.requestFocus();
@@ -222,6 +228,28 @@ public class PaintingPanelController {
             changeColour();
             ensureFocus();
         });
+    }
+
+    public void setCanvasSize(int width, int height) {
+        paintingModel.setCanvasSize(width, height);
+        setPaintingPanelSize(width, height);
+
+        mainController.getStatusBarController().updateImageSize(width, height);
+    }
+
+    public void resizePanelWhenOpenedFileIsWiderOrHigher(int width, int height) {
+        boolean isWider = width > paintingView.getWidth();
+        boolean isHigher = height > paintingView.getWidth();
+
+        if (isWider || isHigher) {
+            setPaintingPanelSize(width, height);
+        }
+    }
+
+    public void setPaintingPanelSize(int width, int height) {
+        paintingView.setPreferredSize(new Dimension(width, height));
+        paintingView.revalidate(); // Aktualisiert das Layout-Management
+        paintingView.repaint(); // Zeichnet das Panel neu
     }
 
     private void ensureFocus() {
