@@ -1,11 +1,16 @@
 package model;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ImagePropertiesModel {
     private  int defaultWidth;
     private int defaultHeight;
     private int width;  // Immer in Pixel gespeichert
     private int height;
     private int dpi;
+    private final File imageFile;
 
     public enum Unit {
         PIXEL, CM, INCH
@@ -13,12 +18,13 @@ public class ImagePropertiesModel {
 
     private Unit currentUnit = Unit.PIXEL;
 
-    public ImagePropertiesModel(int width, int height, int dpi) {
+    public ImagePropertiesModel(int width, int height, int dpi, File imageFile) {
         this.defaultWidth = 1247;
         this.defaultHeight = 1247;
         this.width = width;
         this.height = height;
         this.dpi = dpi;
+        this.imageFile = imageFile;
     }
 
     public int getDefaultWidth() {return defaultWidth; }
@@ -116,5 +122,25 @@ public class ImagePropertiesModel {
         this.width = convertUnitToPixels(widthInNewUnit, newUnit);
         this.height = convertUnitToPixels(heightInNewUnit, newUnit);
         currentUnit = newUnit;
+    }
+
+    /**
+     * Gibt das letzte Änderungsdatum der Datei zurück.
+     */
+    public String getLastModifiedDate() {
+        if (imageFile == null || !imageFile.exists()) return "Nicht verfügbar";
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        return sdf.format(new Date(imageFile.lastModified()));
+    }
+
+    /**
+     * Gibt die Dateigröße in MB zurück.
+     */
+    public String getFileSize() {
+        if (imageFile == null || !imageFile.exists()) return "Nicht verfügbar";
+
+        double fileSizeMB = imageFile.length() / (1024.0 * 1024.0);
+        return String.format("%.2f MB", fileSizeMB);
     }
 }

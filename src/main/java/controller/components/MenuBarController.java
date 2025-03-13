@@ -328,82 +328,6 @@ public class MenuBarController implements ActionListener {
         }
     }
 
-
-
-    /*private void saveFileAs() {
-        JFileChooser fileChooser = new JFileChooser();
-        FileChooserConfigurator.configureFileChooser(fileChooser);
-        //fileChooser.setFileFilter(new FileNameExtensionFilter("Bilddateien (*.jpg / *.jpeg)", "jpg", "jpeg"));
-
-        if (fileChooser.showSaveDialog(mainWindow) == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            String fileName = selectedFile.getName().toLowerCase();
-
-            // 1️⃣ Standardmäßige Dateiendung bestimmen (basierend auf aktivem Filter)
-            String selectedExtension = "jpg"; // Standard: JPG
-            FileNameExtensionFilter selectedFilter = (FileNameExtensionFilter) fileChooser.getFileFilter();
-
-            if (selectedFilter.getDescription().contains("PNG")) {
-                selectedExtension = "png";
-            }
-
-            if (!fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg")) {
-                File parentDirectory = selectedFile.getParentFile();
-                if (parentDirectory == null) {
-                    System.out.println(timeStamp() + ": Fehler -> Speicherpfad ungültig.");
-                    JOptionPane.showMessageDialog(mainWindow,
-                            "Fehler: Speicherpfad ungültig.",
-                            "Fehler",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                selectedFile = new File(parentDirectory, selectedFile.getName() + ".jpg");
-            }
-
-            this.currentFile = selectedFile;
-            writeFile(currentFile);
-        } else {
-            System.out.println(timeStamp() + ": Datei wurde nicht ausgewählt.");
-        }
-    }
-
-    private void writeFile(File file) {
-        try  {
-            BufferedImage image = paintingModel.getCanvas();
-            if (image == null) {
-                System.out.println("Fehler: Das Bildobjekt ist null. Überprüfe paintingModel.getCanvas().");
-                return;
-            }
-
-            if (file.exists() && !file.canWrite()) {
-                System.out.println("Fehler: Die Datei ist schreibgeschützt oder von einem anderen Prozess gesperrt.");
-                return;
-            }
-
-            // Speichere das Bild in die Datei
-            boolean success = ImageIO.write(paintingModel.getCanvas(), "jpg", file);
-
-            if (!success) {
-                boolean secondTry = ImageIO.write(convertImage(paintingModel.getCanvas()), "jpg", file);
-
-                if (!success && !secondTry) throw new IOException("ImageIO.write() konnte das Bild nicht speichern.");
-            }
-            mainWindow.setTitle("BasicPaint | " + file.getName());
-            System.out.println(timeStamp() + ": Speichere Datei nach: " + file.getAbsolutePath());
-            hasUnsavedChanges = false;
-            System.out.println(timeStamp() + ": Änderungen gespeichert -> hasUnsavedChanges = false \n");
-        } catch (IOException e) {
-            System.out.print(timeStamp() +": ");
-            e.printStackTrace();
-            System.out.println("\n");
-
-            JOptionPane.showMessageDialog(mainWindow,
-                    "Fehler beim Speichern der Datei.\n" + e.getMessage(),
-                    "Fehler",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }*/
-
     private BufferedImage convertImage(BufferedImage image) {
         BufferedImage formattedImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g = formattedImage.createGraphics();
@@ -442,7 +366,7 @@ public class MenuBarController implements ActionListener {
         int currentWidth = paintingModel.getCanvas().getWidth();
         int currentHeight = paintingModel.getCanvas().getHeight();
 
-        ImagePropertiesController controller = new ImagePropertiesController(mainWindow, currentWidth, currentHeight, 96);
+        ImagePropertiesController controller = new ImagePropertiesController(mainWindow, currentWidth, currentHeight, 96, currentFile);
         controller.showDialog();
 
         if (controller.isConfirmed()) {

@@ -5,6 +5,8 @@ import java.awt.*;
 
 public class ImagePropertiesView extends JDialog {
     private Label resolutionLabel;
+    private Label lastModifiedLabel;
+    private Label fileSizeLabel;
     private JTextField widthField, heightField;
     private JRadioButton pixelButton, cmButton, inchButton;
     private JButton okButton, cancelButton, resetButton;
@@ -26,16 +28,29 @@ public class ImagePropertiesView extends JDialog {
         gbc.gridy++;
         gbc. gridx = 0;
         add(new Label("Auflösung:"), gbc);
-
         gbc.gridx++;
         this.resolutionLabel = new Label("96 DPI");
         add(resolutionLabel, gbc);
 
+        gbc.gridy++;
+        gbc.gridx = 0;
+        add(new Label("Zuletzt gespeichert:"), gbc);
         gbc.gridx++;
-        add(new Label(" "), gbc);
+        lastModifiedLabel = new Label("Nicht verfügbar");
+        add(lastModifiedLabel, gbc);
 
+        gbc.gridy++;
+        gbc.gridx = 0;
+        add(new Label("Größe auf Datenträger:"), gbc);
         gbc.gridx++;
-        add(new Label(" "), gbc);
+        fileSizeLabel = new Label("Nicht verfügbar");
+        add(fileSizeLabel, gbc);
+
+        //gbc.gridx++;
+        //add(new Label(" "), gbc);
+
+        //gbc.gridx++;
+        //add(new Label(" "), gbc);
 
         gbc.gridy++;
         gbc.gridx = 0; gbc.gridwidth = 4;
@@ -120,5 +135,10 @@ public class ImagePropertiesView extends JDialog {
     public JRadioButton getInchButton() { return inchButton; }
     public JButton getOkButton() { return okButton; }
     public JButton getCancelButton() { return cancelButton; }
-    public JButton getResetButton() { return resetButton; } // Getter für neuen Button
+    public JButton getResetButton() { return resetButton; }// Getter für neuen Button
+
+    public void updateFileInfo(String lastModified, String fileSize) {
+        lastModifiedLabel.setText(lastModified);
+        fileSizeLabel.setText(fileSize);
+    }
 }

@@ -6,15 +6,19 @@ import view.components.ImagePropertiesView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 public class ImagePropertiesController {
     private final ImagePropertiesModel model;
     private final ImagePropertiesView view;
     private boolean confirmed = false;
 
-    public ImagePropertiesController(Frame parent, int width, int height, int dpi) {
-        model = new ImagePropertiesModel(width, height, dpi);
+    public ImagePropertiesController(Frame parent, int width, int height, int dpi, File imageFile) {
+        model = new ImagePropertiesModel(width, height, dpi, imageFile);
         view = new ImagePropertiesView(parent);
+
+        view.updateFileInfo(model.getLastModifiedDate(), model.getFileSize());
+
 
         // Setze Startwerte
         updateViewFields();
