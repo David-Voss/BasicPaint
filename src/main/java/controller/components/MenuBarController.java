@@ -49,6 +49,7 @@ public class MenuBarController implements ActionListener {
 
         initialiseShortcuts();
         initialiseListeners();
+        updateUndoRedoState();
     }
 
     public void initialiseShortcuts() {
@@ -393,6 +394,7 @@ public class MenuBarController implements ActionListener {
             mainWindow.setTitle("BasicPaint | " + previousState.fileName);
 
             mainWindow.getPaintingPanelView().repaint();
+            updateUndoRedoState();
         }
     }
 
@@ -409,8 +411,21 @@ public class MenuBarController implements ActionListener {
             mainWindow.setTitle("BasicPaint | " + nextState.fileName);
 
             mainWindow.getPaintingPanelView().repaint();
+            updateUndoRedoState();
         }
     }
+
+    private void updateUndoRedoState() {
+        boolean canUndo = !undoStack.isEmpty();
+        boolean canRedo = !redoStack.isEmpty();
+
+        menuBar.getUndoItem().setEnabled(canUndo);
+        menuBar.getUndoButton().setEnabled(canUndo);
+
+        menuBar.getRedoItem().setEnabled(canRedo);
+        menuBar.getRedoButton().setEnabled(canRedo);
+    }
+
 
     private void saveCanvasState() {
         BufferedImage currentState = copyImage(paintingModel.getCanvas());
@@ -427,6 +442,7 @@ public class MenuBarController implements ActionListener {
 
         undoStack.push(new CanvasState(currentState, currentWidth, currentHeight, currentFileName));
         redoStack.clear(); // Redo wird ungültig, sobald eine neue Aktion passiert
+        updateUndoRedoState();
     }
 
 

@@ -2,8 +2,6 @@ package view.components;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ImagePropertiesView extends JDialog {
     private JComboBox<String> dpiComboBox;
@@ -42,12 +40,6 @@ public class ImagePropertiesView extends JDialog {
         fileSizeLabel = new Label("Nicht verfügbar");
         add(fileSizeLabel, gbc);
 
-        //gbc.gridx++;
-        //add(new Label(" "), gbc);
-
-        //gbc.gridx++;
-        //add(new Label(" "), gbc);
-
         gbc.gridy++;
         gbc.gridx = 0; gbc.gridwidth = 4;
         add(new JSeparator(), gbc);
@@ -56,9 +48,9 @@ public class ImagePropertiesView extends JDialog {
         add(new JLabel("Einheiten:"), gbc);
 
         ButtonGroup unitGroup = new ButtonGroup();
-        pixelButton = new JRadioButton("Pixel", true);
-        cmButton = new JRadioButton("Zentimeter");
-        inchButton = new JRadioButton("Zoll");
+        pixelButton = new JRadioButton("Pixel (px)", true);
+        cmButton = new JRadioButton("Zentimeter (cm)");
+        inchButton = new JRadioButton("Zoll (in)");
 
         pixelButton.setFont(pixelButton.getFont().deriveFont(Font.PLAIN));
         cmButton.setFont(cmButton.getFont().deriveFont(Font.PLAIN));
