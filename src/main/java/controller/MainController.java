@@ -2,6 +2,7 @@ package controller;
 
 import controller.components.*;
 import toolbox.FileHandler;
+import toolbox.TimeStamp;
 import view.MainWindow;
 
 import javax.swing.*;
@@ -49,7 +50,7 @@ public class MainController implements ActionListener {
         mainWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                System.out.println(time() + ": windowClosing() aufgerufen.");
+                System.out.println(timeStamp() + ": windowClosing() aufgerufen.");
                 boolean canExit = menuBarController.confirmDiscardChanges();
                 if (!canExit) {
                     // Falls der Benutzer "Abbrechen" gedrückt hat, NICHT schließen
@@ -58,7 +59,7 @@ public class MainController implements ActionListener {
                 }
 
                 // Falls der Benutzer "Ja" oder "Nein" gewählt hat, die Anwendung beenden
-                System.out.println(time() + ": Anwendung wird geschlossen.");
+                System.out.println(timeStamp() + ": Anwendung wird geschlossen.");
                 mainWindow.dispose();
                 System.exit(0);
             }
@@ -92,49 +93,19 @@ public class MainController implements ActionListener {
 
     }
 
-    public static String dateTime() {
-        Locale systemLocale = Locale.getDefault();
-        ZoneId systemTimeZone = ZoneId.systemDefault();
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(systemLocale);
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(systemLocale);
-
-        ZonedDateTime dateTimeNow = ZonedDateTime.now(systemTimeZone);
-        String dateTimeString = dateTimeNow.format(dateFormatter) + " " + dateTimeNow.format(timeFormatter);
-        return dateTimeString;
-    }
-
-    public static String date() {
-        Locale systemLocale = Locale.getDefault();
-        ZoneId systemTimeZone = ZoneId.systemDefault();
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(systemLocale);
-
-        ZonedDateTime dateTimeNow = ZonedDateTime.now(systemTimeZone);
-        String dateString = dateTimeNow.format(dateFormatter);
-        return dateString;
-    }
-
-    public static String time() {
-        Locale systemLocale = Locale.getDefault();
-        ZoneId systemTimeZone = ZoneId.systemDefault();
-
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.LONG).withLocale(systemLocale);
-
-        ZonedDateTime dateTimeNow = ZonedDateTime.now(systemTimeZone);
-        String timeString = dateTimeNow.format(timeFormatter);
-        return timeString;
-    }
-
     private void showInitialValuesInConsole() {
-        System.out.println(date() + "\n" +
-                time() + ": BasicPaint gestartet. \n");
+        System.out.println(TimeStamp.date() + "\n" +
+                timeStamp() + ": BasicPaint gestartet. \n");
 
-        System.out.println(time() + ": Initiale Werte MainWindow:");
-        System.out.println(time() + ": MainWindow Höhe = " + mainWindow.getHeight() + " px.");
-        System.out.println(time() + ": MainWindow Breite = " + mainWindow.getWidth() + " px. \n");
+        System.out.println(timeStamp() + ": Initiale Werte MainWindow:");
+        System.out.println(timeStamp() + ": MainWindow Höhe = " + mainWindow.getHeight() + " px.");
+        System.out.println(timeStamp() + ": MainWindow Breite = " + mainWindow.getWidth() + " px. \n");
 
         mainWindow.getPaintingPanelView().getPaintingModel().showInitialPaintingModelValuesInConsole();
+    }
+
+    public static String timeStamp() {
+        return TimeStamp.time();
     }
 }
 

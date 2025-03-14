@@ -37,13 +37,26 @@ public class FileHandler {
 
         int result = chooser.showOpenDialog(parent);
         if (result != JFileChooser.APPROVE_OPTION) {
-            return null; // user cancelled
+            return null; // User hat abgebrochen
         }
+
         File file = chooser.getSelectedFile();
+
+        // ❗ Sicherstellen, dass file nicht null ist
+        if (file == null) {
+            System.out.println("WARNUNG: Keine Datei ausgewählt.");
+            return null;
+        }
+
+        // ❗ Verhindern, dass ein Ordner geöffnet wird
+        if (file.isDirectory()) {
+            chooser.setCurrentDirectory(file);  // Falls Ordner, einfach öffnen
+            return null;  // Nicht versuchen, das als Bild zu lesen
+        }
+
         try {
             BufferedImage img = ImageIO.read(file);
             if (img == null) {
-                // If the file is not a known image type or corrupted, ImageIO may return null.
                 JOptionPane.showMessageDialog(parent,
                         "Die ausgewählte Datei konnte nicht geöffnet werden. \n" +
                                 "Möglicherweise wird das Format nicht unterstützt oder die Datei ist beschädigt.",
@@ -54,7 +67,6 @@ public class FileHandler {
             currentFile = file;
             return img;
         } catch (IOException e) {
-            // Show error message if reading fails.
             JOptionPane.showMessageDialog(parent,
                     "Fehler beim Laden der Datei:\n" + e.getMessage(),
                     "Dateiöffnungsfehler",

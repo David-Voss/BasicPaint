@@ -4,6 +4,7 @@ import controller.MainController;
 import model.PaintingModel;
 import toolbox.FileChooserConfigurator;
 import toolbox.FileHandler;
+import toolbox.TimeStamp;
 import view.MainWindow;
 import view.components.MenuBarView;
 import view.components.PaintingPanelView;
@@ -521,7 +522,7 @@ public class MenuBarController implements ActionListener {
     }
 
     private String timeStamp() {
-        return MainController.time();
+        return TimeStamp.time();
     }
 
     private static class CanvasState {

@@ -1,9 +1,12 @@
 package toolbox;
 
+import controller.MainController;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 /**
  * Configures a {@link JFileChooser} to enhance usability.
@@ -30,18 +33,60 @@ public class FileChooserConfigurator {
         fileChooser.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke("ENTER"), "confirmSelection");
 
+        /*fileChooser.getActionMap().put("confirmSelection", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+
+                if (focusOwner instanceof JButton) {
+                    ((JButton) focusOwner).doClick(); // Simuliert einen Button-Klick
+                } else if (focusOwner instanceof JList) {
+                    File selectedFile = fileChooser.getSelectedFile();
+
+                    if (selectedFile == null) {
+                        System.out.println(timeStamp() + ": Ordner ausgewählt.");
+                        return; // ❗ Verhindert NullPointerException
+                    }
+
+                    if (selectedFile.isDirectory()) {
+                        // ✅ Falls Ordner, navigiere in den Ordner statt ihn zu bestätigen
+                        fileChooser.setCurrentDirectory(selectedFile);
+                        fileChooser.rescanCurrentDirectory(); // Aktualisiert die Ansicht
+                        return;
+                    }
+
+                    fileChooser.approveSelection(); // ✅ Datei wird normal bestätigt
+                }
+            }
+        });*/
         fileChooser.getActionMap().put("confirmSelection", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 
                 if (focusOwner instanceof JButton) {
-                    ((JButton) focusOwner).doClick(); // Simulates button click
+                    ((JButton) focusOwner).doClick(); // Simuliert einen Button-Klick
                 } else if (focusOwner instanceof JList) {
-                    fileChooser.approveSelection(); // Confirms file selection
+                    JList<?> fileList = (JList<?>) focusOwner;
+                    Object selectedObject = fileList.getSelectedValue();
+
+                    if (selectedObject instanceof File) {
+                        File selectedFile = (File) selectedObject;
+
+                        if (selectedFile.isDirectory()) {
+                            // ✅ Falls Ordner, navigiere in den Ordner statt ihn zu bestätigen
+                            fileChooser.setCurrentDirectory(selectedFile);
+                            fileChooser.rescanCurrentDirectory(); // Aktualisiert die Ansicht
+                        } else {
+                            // ✅ Falls Datei, bestätige die Auswahl
+                            fileChooser.setSelectedFile(selectedFile);
+                            fileChooser.approveSelection();
+                        }
+                    }
                 }
             }
         });
+
     }
 
     private static void setFileChooserImageFilter(JFileChooser fileChooser) {
@@ -55,5 +100,9 @@ public class FileChooserConfigurator {
         fileChooser.addChoosableFileFilter(pngFilter);
         fileChooser.addChoosableFileFilter(allImagesFilter);
         fileChooser.setFileFilter(allImagesFilter);
+    }
+
+    public static String timeStamp() {
+        return TimeStamp.time();
     }
 }

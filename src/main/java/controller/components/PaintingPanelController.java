@@ -3,6 +3,7 @@ package controller.components;
 import controller.MainController;
 import toolbox.PaintingTool;
 import model.PaintingModel;
+import toolbox.TimeStamp;
 import view.MainWindow;
 import view.components.PaintingPanelView;
 import view.components.ToolBarView;
@@ -395,6 +396,6 @@ public class PaintingPanelController {
     }
 
     private String timeStamp() {
-        return MainController.time();
+        return TimeStamp.time();
     }
 }
