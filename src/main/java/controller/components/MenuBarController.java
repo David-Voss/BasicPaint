@@ -192,6 +192,11 @@ public class MenuBarController implements ActionListener {
             currentFile = null;
             mainWindow.setTitle("BasicPaint");
 
+            // Undo- und Redo-Stack leeren
+            undoStack.clear();
+            redoStack.clear();
+            updateUndoRedoState();
+
             // **Sofortiges Neuzeichnen erzwingen**
             SwingUtilities.invokeLater(() -> mainWindow.getPaintingPanelView().repaint());
 
@@ -223,6 +228,12 @@ public class MenuBarController implements ActionListener {
                 paintingPanel.revalidate();
                 paintingPanel.repaint();
                 hasUnsavedChanges = false;
+
+                // Undo- und Redo-Stack leeren
+                undoStack.clear();
+                redoStack.clear();
+                updateUndoRedoState();
+
                 // Update frame title to show opened file name.
                 File openedFile = fileHandler.getFile();
                 if (openedFile != null) {
