@@ -25,12 +25,12 @@ public class PaintingPanelController {
     private PaintingModel paintingModel;
     private ToolBarView toolBarView;
 
-
-
     private Point startPoint;
     private Point endPoint;
     private boolean isDragging = false;
     private boolean isDrawingShape = false; // Neue Variable für Form-Zeichnen
+
+    private boolean zoomDialogShown = false;
 
     public PaintingPanelController(MainWindow mainWindow, MainController mainController) {
         this.mainWindow = mainWindow;
@@ -48,42 +48,54 @@ public class PaintingPanelController {
     private void initialiseListeners() {
         paintingView.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                if (!isDragging) {
-                    System.out.println(timeStamp() + ": Zeichenfläche wird bearbeitet. \n" +
-                            timeStamp() + ": Tool: " + toolBarView.getSelectedTool());
-                }
 
-                startPoint = e.getPoint();
-                isDragging = true;
-                isDrawingShape = true;
+                if (toolBarView.getMagnifierButton().isSelected()) {
+                    e.consume(); // Verhindert, dass andere Listener das Event weiterverarbeiten
 
-                /*System.out.println(time + ": Zeichenfläche wird bearbeitet. \n" +
-                        time + ": Tool: " + toolBarView.getSelectedTool());*/
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    System.out.println(timeStamp() + ": Rechte Maustaste gedrückt.");
-                }
-
-                if (isPaintingToolSelected(PaintingTool.PENCIL) || isPaintingToolSelected(PaintingTool.ERASER)) {
-                    if (paintingModel.getStrokeWidth() <= 2) {
-                        paintingModel.getG2D().fillRect(e.getX(), e.getY(), paintingModel.getStrokeWidth(), paintingModel.getStrokeWidth());
-                        System.out.println(timeStamp() + ": Punkt gesetzt.");
-                    } else {
-                        //drawPoint(e.getX(), e.getY());
-                        drawCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), paintingModel.getG2D());
-                        fillCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), paintingModel.getG2D());
-                        System.out.println(timeStamp() + ": Punkt gesetzt.");
+                    if (SwingUtilities.isLeftMouseButton(e)) {
+                        // To be implemented
+                    } else if (SwingUtilities.isRightMouseButton(e)) {
+                        // To be implemented
                     }
-                    paintingView.repaint();
+
+                    return;
+                } else {
+                    if (!isDragging) {
+                        System.out.println(timeStamp() + ": Zeichenfläche wird bearbeitet. \n" +
+                                timeStamp() + ": Tool: " + toolBarView.getSelectedTool());
+                    }
+
+                    startPoint = e.getPoint();
+                    isDragging = true;
+                    isDrawingShape = true;
+
+                    if (SwingUtilities.isRightMouseButton(e)) {
+                        System.out.println(timeStamp() + ": Rechte Maustaste gedrückt.");
+                    }
+
+                    if (isPaintingToolSelected(PaintingTool.PENCIL) || isPaintingToolSelected(PaintingTool.ERASER)) {
+                        if (paintingModel.getStrokeWidth() <= 2) {
+                            paintingModel.getG2D().fillRect(e.getX(), e.getY(), paintingModel.getStrokeWidth(), paintingModel.getStrokeWidth());
+                            System.out.println(timeStamp() + ": Punkt gesetzt.");
+                        } else {
+                            //drawPoint(e.getX(), e.getY());
+                            drawCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), paintingModel.getG2D());
+                            fillCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), paintingModel.getG2D());
+                            System.out.println(timeStamp() + ": Punkt gesetzt.");
+                        }
+                        paintingView.repaint();
+                    }
+                    else if (toolBarView.getSelectedTool() == PaintingTool.FILL) {
+                        paintingModel.floodFill(paintingModel.getCanvas(),e.getX(), e.getY(), paintingModel.getCurrentColour(), 10);
+                        paintingView.repaint();
+                    }
+                    else if (SwingUtilities.isRightMouseButton(e) /*&& !isPencilOrEraserSelected()*/) {
+                        System.out.println(timeStamp() + ": Zeichnen abgebrochen (rechte Maustaste). \n");
+                        cancelDrawing();
+                        return; // Sofort beenden, nichts weiter tun
+                    }
                 }
-                else if (toolBarView.getSelectedTool() == PaintingTool.FILL) {
-                    paintingModel.floodFill(paintingModel.getCanvas(),e.getX(), e.getY(), paintingModel.getCurrentColour(), 10);
-                    paintingView.repaint();
-                }
-                else if (SwingUtilities.isRightMouseButton(e) /*&& !isPencilOrEraserSelected()*/) {
-                    System.out.println(timeStamp() + ": Zeichnen abgebrochen (rechte Maustaste). \n");
-                    cancelDrawing();
-                    return; // Sofort beenden, nichts weiter tun
-                }
+
             }
 
             @Override
@@ -117,8 +129,11 @@ public class PaintingPanelController {
                     paintingView.clearPreviewShape();
                     paintingView.repaint();
                 }
-                isDragging = false;
-                System.out.println(timeStamp() + ": Bearbeitung beendet. \n");
+                if (!isPaintingToolSelected(PaintingTool.MAGNIFIER)){
+                    isDragging = false;
+                    System.out.println(timeStamp() + ": Bearbeitung beendet. \n");
+                }
+
             }
         });
 
@@ -218,7 +233,18 @@ public class PaintingPanelController {
         toolBarView.getPencilButton().addActionListener(e -> ensureFocus());
         toolBarView.getFillButton().addActionListener(e -> ensureFocus());
         toolBarView.getEraserButton().addActionListener(e -> ensureFocus());
-        toolBarView.getMagnifierButton().addActionListener(e -> ensureFocus());
+        toolBarView.getMagnifierButton().addActionListener(e -> {
+            if (!zoomDialogShown) {
+                JOptionPane.showMessageDialog(mainWindow,
+                        "Die Zoomfunktion konnte leider noch nicht zufriedenstellend implementiert werden. \n" +
+                                "Sie enthält daher noch keine Funktionen \n\n" +
+                                "Diese Meldung wird in dieser Sitzung kein weiteres Mal angezeigt.",
+                        "Hinweis: Funktion noch nicht vorhanden",
+                        JOptionPane.INFORMATION_MESSAGE);
+                zoomDialogShown = true;
+            }
+            ensureFocus();
+        });
 
         toolBarView.getLineButton().addActionListener(e -> ensureFocus());
         toolBarView.getEllipseButton().addActionListener(e -> ensureFocus());

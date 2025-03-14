@@ -28,7 +28,7 @@ public class MainController implements ActionListener {
 
         this.mainWindow = mainWindow;
         this.menuBarController = new MenuBarController(mainWindow, this, fileHandler);
-        this.toolBarController = new ToolBarController(mainWindow.getToolBarView());
+        this.toolBarController = new ToolBarController(mainWindow, this);
         this.paintingController = new PaintingPanelController(mainWindow, this);
         this.statusBarController = new StatusBarController(mainWindow, this);
 
@@ -36,6 +36,8 @@ public class MainController implements ActionListener {
         showInitialValuesInConsole();
     }
 
+    public MenuBarController getMenuBarController() { return menuBarController; }
+    public ToolBarController getToolBarController() { return toolBarController; }
     public PaintingPanelController getPaintingPanelController() { return paintingController; }
     public StatusBarController getStatusBarController() { return statusBarController; }
 
