@@ -4,13 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class StatusBarView extends JPanel {
-    private final JLabel mousePositionLabel;
+    private JLabel mousePositionLabel;
     //private final JLabel selectionSizeLabel;
-    private final JLabel imageSizeLabel;
-    private final JComboBox<String> zoomDropdown;
-    private final JButton zoomOutButton;
-    private final JButton zoomInButton;
-    private final JSlider zoomSlider;
+    private JLabel imageSizeLabel;
+    private JComboBox<String> zoomDropdown;
+    private JButton zoomOutButton;
+    private JButton zoomInButton;
+    private JSlider zoomSlider;
 
     public StatusBarView() {
         setLayout(new BorderLayout());
@@ -35,11 +35,12 @@ public class StatusBarView extends JPanel {
         //combinedCenterPanel.add(selectionSizeLabel);
         combinedCenterPanel.add(imageSizeLabel);
 
+        // Panel for zoom function -> To be implemented!
         // 🔹 Rechte Seite: Zoom-Steuerung
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.X_AXIS));
 
-        zoomOutButton = new JButton("➖");
+        /*zoomOutButton = new JButton("➖");
         zoomDropdown = new JComboBox<>(new String[]{"25%", "50%", "75%", "100%", "150%", "200%", "300%"});
         zoomDropdown.setSelectedItem("100%");
         zoomInButton = new JButton("➕");
@@ -53,7 +54,7 @@ public class StatusBarView extends JPanel {
         rightPanel.add(Box.createHorizontalStrut(5));
         rightPanel.add(zoomInButton);
         rightPanel.add(Box.createHorizontalStrut(5));
-        rightPanel.add(zoomSlider);
+        rightPanel.add(zoomSlider);*/
 
         // Panels zur Statusbar hinzufügen
         add(leftPanel, BorderLayout.WEST);
