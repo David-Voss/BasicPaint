@@ -238,7 +238,7 @@ public class MenuBarController implements ActionListener {
                 // Update frame title to show opened file name.
                 File openedFile = fileHandler.getFile();
                 if (openedFile != null) {
-                    currentFile = openedFile;
+                    this.currentFile = openedFile;
                     mainWindow.setTitle("BasicPaint | " + openedFile.getName());
 
                     System.out.println(timeStamp() + ": Datei geöffnet. \n" +
