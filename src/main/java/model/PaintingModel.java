@@ -1,7 +1,6 @@
 package model;
 
-import controller.MainController;
-import toolbox.TimeStamp;
+import toolbox.DateTimeStamp;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -168,7 +167,7 @@ public class PaintingModel {
     }
 
     private String timeStamp() {
-        return TimeStamp.time();
+        return DateTimeStamp.time();
     }
 
     public class FloodFill {

@@ -4,7 +4,7 @@ import controller.MainController;
 import model.PaintingModel;
 import toolbox.FileChooserConfigurator;
 import toolbox.FileHandler;
-import toolbox.TimeStamp;
+import toolbox.DateTimeStamp;
 import view.MainWindow;
 import view.components.MenuBarView;
 import view.components.PaintingPanelView;
@@ -486,43 +486,100 @@ public class MenuBarController implements ActionListener {
         return copy;
     }
 
-    /**
-     * Prompts the user to save changes if the current drawing is unsaved, before discarding it.
-     * @return true if it is okay to proceed (no unsaved changes or user chose to discard/save changes), false if the action is cancelled
-     */
     public boolean confirmDiscardChanges() {
         if (!hasUnsavedChanges) {
-            return true; // No unsaved changes, no need to confirm.
+            return true; // Keine ungespeicherten Änderungen, kein Bestätigungsdialog notwendig.
         }
-        // Ask the user if they want to save the current work.
-        int result = JOptionPane.showConfirmDialog(
-                mainWindow,
+
+        // Erstelle eine Option-Pane mit den Buttons "Ja", "Nein" und "Abbrechen"
+        String[] options = {"Ja", "Nein", "Abbrechen"};
+        JOptionPane optionPane = new JOptionPane(
                 "Die aktuelle Zeichnung wurde nicht gespeichert. Bild speichern?",
-                "Ungespeicherte Änderungen",
-                JOptionPane.YES_NO_CANCEL_OPTION
-        );
-        if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
-            // User cancelled the action.
-            System.out.println(timeStamp() + ": Abbrechen gewählt. \n");
-            return false;
-        }
-        if (result == JOptionPane.YES_OPTION) {
-            // Try to save; if saving fails or is cancelled, abort the action.
-            System.out.println(timeStamp() + ": Ja gewählt -> saveFile() wird aufgerufen.");
-            boolean saved = saveFile();
-            if (!saved) {
-                return false;
+                JOptionPane.WARNING_MESSAGE,
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                null,
+                options,
+                options[0]); // Standard ist "Ja"
+
+        // Erstelle den Dialog
+        JDialog dialog = optionPane.createDialog(mainWindow, "Ungespeicherte Änderungen");
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+
+        // **Schließen mit X = "Abbrechen"**
+        dialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                optionPane.setValue("Abbrechen");
+                dialog.setVisible(false);
+                dialog.dispose();
+            }
+        });
+
+        // **ALLE Buttons holen**
+        JButton yesButton = null, noButton = null, cancelButton = null;
+        for (Component c : optionPane.getComponents()) {
+            if (c instanceof JPanel) {
+                for (Component btn : ((JPanel) c).getComponents()) {
+                    if (btn instanceof JButton) {
+                        JButton button = (JButton) btn;
+                        if (button.getText().equals("Ja")) yesButton = button;
+                        if (button.getText().equals("Nein")) noButton = button;
+                        if (button.getText().equals("Abbrechen")) cancelButton = button;
+                    }
+                }
             }
         }
-        if (result == JOptionPane.NO_OPTION) {
-            System.out.println(timeStamp() + ": Nein gewählt -> Änderungen wurden nicht gespeichert. \n");
+
+        // **ENTER- und ESC-KEY LISTENER HINZUFÜGEN**
+        KeyAdapter keyListener = new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+                    if (focusOwner instanceof JButton) {
+                        ((JButton) focusOwner).doClick(); // Nur Button mit Fokus drücken!
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    optionPane.setValue("Abbrechen");
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                }
+            }
+        };
+
+        // **KeyListener für den gesamten Dialog setzen**
+        dialog.addKeyListener(keyListener);
+        dialog.setFocusable(true);
+        dialog.requestFocusInWindow();
+
+        // **KeyListener für alle Buttons setzen**
+        if (yesButton != null) yesButton.addKeyListener(keyListener);
+        if (noButton != null) noButton.addKeyListener(keyListener);
+        if (cancelButton != null) cancelButton.addKeyListener(keyListener);
+
+        // Dialog anzeigen
+        dialog.setVisible(true);
+
+        // Ergebnis ermitteln
+        Object selectedValue = optionPane.getValue();
+
+        if (selectedValue == null || selectedValue.equals("Abbrechen")) {
+            System.out.println(timeStamp() + ": Abbrechen gewählt.");
+            return false;
         }
-        // If NO was selected or save was successful, proceed.
+        if (selectedValue.equals("Ja")) {
+            System.out.println(timeStamp() + ": Ja gewählt -> saveFile() wird aufgerufen.");
+            return saveFile(); // Falls speichern fehlschlägt, Abbruch
+        }
+        if (selectedValue.equals("Nein")) {
+            System.out.println(timeStamp() + ": Nein gewählt -> Änderungen wurden nicht gespeichert.");
+        }
+
         return true;
     }
 
     private String timeStamp() {
-        return TimeStamp.time();
+        return DateTimeStamp.time();
     }
 
     private static class CanvasState {

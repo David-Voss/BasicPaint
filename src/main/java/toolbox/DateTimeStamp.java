@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
-public class TimeStamp {
+public class DateTimeStamp {
 
     public static String dateTime() {
         Locale systemLocale = Locale.getDefault();

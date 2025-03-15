@@ -3,7 +3,7 @@ package controller.components;
 import controller.MainController;
 import toolbox.PaintingTool;
 import model.PaintingModel;
-import toolbox.TimeStamp;
+import toolbox.DateTimeStamp;
 import view.MainWindow;
 import view.components.PaintingPanelView;
 import view.components.ToolBarView;
@@ -17,7 +17,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 public class PaintingPanelController {
     MainWindow mainWindow;
@@ -396,6 +395,6 @@ public class PaintingPanelController {
     }
 
     private String timeStamp() {
-        return TimeStamp.time();
+        return DateTimeStamp.time();
     }
 }

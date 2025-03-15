@@ -2,16 +2,11 @@ package controller;
 
 import controller.components.*;
 import toolbox.FileHandler;
-import toolbox.TimeStamp;
+import toolbox.DateTimeStamp;
 import view.MainWindow;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Locale;
 
 public class MainController implements ActionListener {
 
@@ -94,7 +89,7 @@ public class MainController implements ActionListener {
     }
 
     private void showInitialValuesInConsole() {
-        System.out.println(TimeStamp.date() + "\n" +
+        System.out.println(DateTimeStamp.date() + "\n" +
                 timeStamp() + ": BasicPaint gestartet. \n");
 
         System.out.println(timeStamp() + ": Initiale Werte MainWindow:");
@@ -105,7 +100,7 @@ public class MainController implements ActionListener {
     }
 
     public static String timeStamp() {
-        return TimeStamp.time();
+        return DateTimeStamp.time();
     }
 }
 
