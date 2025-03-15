@@ -61,7 +61,7 @@ public class ToolBarController {
             registerKeyBinding(mainWindowRootPane, KeyEvent.VK_O, () -> toolBarView.getEllipseButton().doClick());
             registerKeyBinding(mainWindowRootPane, KeyEvent.VK_R, () -> toolBarView.getRectangleButton().doClick());
 
-            toolBarView.getBrushSizeDropdown().addActionListener(e -> {
+            toolBarView.getBrushSizeSelector().addActionListener(e -> {
                 updateStrokeWidth();
                 ensureFocus();
             });
@@ -71,8 +71,8 @@ public class ToolBarController {
                 ensureFocus();
             });
 
-            toolBarView.getColourChooserButton().addActionListener(e -> openColourChooser());
-
+            // To be implemented
+            //toolBarView.getColourChooserButton().addActionListener(e -> openColourChooser());
         }
 
     /**
@@ -98,7 +98,7 @@ public class ToolBarController {
     }
 
     private void increaseBrushSize() {
-        JComboBox<String> brushSizeDropdown = toolBarView.getBrushSizeDropdown(); // Zugriff auf die ComboBox
+        JComboBox<String> brushSizeDropdown = toolBarView.getBrushSizeSelector(); // Zugriff auf die ComboBox
         int currentIndex = brushSizeDropdown.getSelectedIndex();
 
         if (currentIndex < brushSizeDropdown.getItemCount() - 1) {
@@ -108,7 +108,7 @@ public class ToolBarController {
     }
 
     private void decreaseBrushSize() {
-        JComboBox<String> brushSizeDropdown = toolBarView.getBrushSizeDropdown();
+        JComboBox<String> brushSizeDropdown = toolBarView.getBrushSizeSelector();
         int currentIndex = brushSizeDropdown.getSelectedIndex();
 
         if (currentIndex > 0) {
@@ -118,7 +118,7 @@ public class ToolBarController {
     }
 
     private void updateStrokeWidth() {
-        String selectedValue = (String) toolBarView.getBrushSizeDropdown().getSelectedItem();
+        String selectedValue = (String) toolBarView.getBrushSizeSelector().getSelectedItem();
 
         if(selectedValue != null) {
             paintingModel.setStrokeWidth(Integer.parseInt(selectedValue.replace(" px", "")));
@@ -126,7 +126,8 @@ public class ToolBarController {
         }
     }
 
-    private void openColourChooser() {
+    // To be implemented
+    /*private void openColourChooser() {
         Color initialColour = paintingModel.getCurrentColour(); // Aktuelle Farbe holen
         Color selectedColour = JColorChooser.showDialog(mainWindow, "Farbe auswählen", initialColour);
 
@@ -137,11 +138,11 @@ public class ToolBarController {
         }
 
         ensureFocus(); // Stellt sicher, dass das Zeichenfeld weiter aktiv ist
-    }
+    }*/
 
 
     private void changeColour() {
-        Color newColour = toolBarView.getColour();
+        Color newColour = toolBarView.getSelectedColour();
         if (newColour != null) {
             paintingModel.setCurrentColour(newColour);
         }
