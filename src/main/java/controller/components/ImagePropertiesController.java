@@ -5,9 +5,7 @@ import view.components.ImagePropertiesView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.File;
 
 public class ImagePropertiesController {
@@ -74,7 +72,7 @@ public class ImagePropertiesController {
     }
 
     /**
-     * Setzt die Werte auf den Standardwert zurück (1247 x 1247 px).
+     * Setzt die Werte auf den Standardwert zurück.
      */
     private void resetToDefault() {
         model.setSizeInPixels(model.getDefaultWidth(), model.getDefaultHeight());

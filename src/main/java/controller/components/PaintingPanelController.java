@@ -30,8 +30,6 @@ public class PaintingPanelController {
     private boolean isDragging = false;
     private boolean isDrawingShape = false; // Neue Variable für Form-Zeichnen
 
-    private boolean zoomDialogShown = false;
-
     public PaintingPanelController(MainWindow mainWindow, MainController mainController) {
         this.mainWindow = mainWindow;
         this.mainController = mainController;
@@ -224,36 +222,6 @@ public class PaintingPanelController {
                 }
             }
         });
-
-        toolBarView.getBrushSizeDropdown().addActionListener(e -> {
-            updateStrokeWidth();
-            ensureFocus();
-        });
-
-        toolBarView.getPencilButton().addActionListener(e -> ensureFocus());
-        toolBarView.getFillButton().addActionListener(e -> ensureFocus());
-        toolBarView.getEraserButton().addActionListener(e -> ensureFocus());
-        toolBarView.getMagnifierButton().addActionListener(e -> {
-            if (!zoomDialogShown) {
-                JOptionPane.showMessageDialog(mainWindow,
-                        "Die Zoomfunktion konnte leider noch nicht zufriedenstellend implementiert werden. \n" +
-                                "Sie enthält daher noch keine Funktionen \n\n" +
-                                "Diese Meldung wird in dieser Sitzung kein weiteres Mal angezeigt.",
-                        "Hinweis: Funktion noch nicht vorhanden",
-                        JOptionPane.INFORMATION_MESSAGE);
-                zoomDialogShown = true;
-            }
-            ensureFocus();
-        });
-
-        toolBarView.getLineButton().addActionListener(e -> ensureFocus());
-        toolBarView.getEllipseButton().addActionListener(e -> ensureFocus());
-        toolBarView.getRectangleButton().addActionListener(e -> ensureFocus());
-
-        toolBarView.getColourChooser().getSelectionModel().addChangeListener(e -> {
-            changeColour();
-            ensureFocus();
-        });
     }
 
     public void setCanvasSize(int width, int height) {
@@ -278,10 +246,6 @@ public class PaintingPanelController {
         paintingView.repaint(); // Zeichnet das Panel neu
     }
 
-    private void ensureFocus() {
-        SwingUtilities.invokeLater(() -> paintingView.requestFocusInWindow());
-    }
-
     private void cancelDrawing() {
         //System.out.println("Zeichenvorgang abgebrochen.");
         isDragging = false;
@@ -290,23 +254,6 @@ public class PaintingPanelController {
         endPoint = null;
         paintingView.clearPreviewShape(); // Vorschau löschen
         paintingView.repaint(); // Ansicht aktualisieren
-    }
-
-
-    private void changeColour() {
-        Color newColour = toolBarView.getColour();
-        if (newColour != null) {
-            paintingModel.setCurrentColour(newColour);
-        }
-    }
-
-    private void updateStrokeWidth() {
-        String selectedValue = (String) toolBarView.getBrushSizeDropdown().getSelectedItem();
-
-        if(selectedValue != null) {
-            paintingModel.setStrokeWidth(Integer.parseInt(selectedValue.replace(" px", "")));
-            System.out.println(timeStamp() + ": Neue Pinselbreite: " + paintingModel.getStrokeWidth() + " px");
-        }
     }
 
     private void eraserOrOtherToolColor() {

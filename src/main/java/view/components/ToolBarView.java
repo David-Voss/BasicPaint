@@ -25,6 +25,7 @@ public class ToolBarView extends JPanel {
     private final JToggleButton rectangleButton;
 
     private final JPanel colourPanel;
+    private JButton colourChooserButton;
     private JColorChooser colourChooser;
 
     public ToolBarView() {
@@ -33,8 +34,7 @@ public class ToolBarView extends JPanel {
 
         this.brushSizeDropdown = new JComboBox<>(new String[]{"1 px", "2 px", "3 px", "5 px", "10 px", "20 px", "30 px", "50 px", "100 px", "150 px", "200 px", "250 px"});
         this.brushSizeDropdown.setSelectedItem("3 px");
-        this.brushSizeDropdown.setToolTipText("Strichstärke");
-        //this.brushSizeDropdown.setEditable(true);
+        this.brushSizeDropdown.setToolTipText("Strichstärke | Kleiner [Q] / Größer [W]");
 
         add(new JLabel(CreateIcon.loadIcon("assets/icons/pencil-solid.png", 15, 15)));
         add(new JLabel(" / "));
@@ -65,9 +65,9 @@ public class ToolBarView extends JPanel {
 
         this.paintingToolPanel = new JPanel();
 
-        this.lineButton = CreateIcon.createToggleButton("assets/icons/line-regular.png", "Linie");
-        this.ellipseButton = CreateIcon.createToggleButton("assets/icons/circle-regular.png","Ellipse");
-        this.rectangleButton = CreateIcon.createToggleButton("assets/icons/square-full-regular.png", "Rechteck");
+        this.lineButton = CreateIcon.createToggleButton("assets/icons/line-regular.png", "Linie [L]");
+        this.ellipseButton = CreateIcon.createToggleButton("assets/icons/circle-regular.png","Ellipse [O]");
+        this.rectangleButton = CreateIcon.createToggleButton("assets/icons/square-full-regular.png", "Rechteck [R]");
 
         add(paintingToolPanel);
         paintingToolButtonGroup.add(lineButton);
@@ -80,7 +80,10 @@ public class ToolBarView extends JPanel {
         addSeparator();
 
         this.colourPanel = setUpColourPanel();
+        this.colourChooserButton = CreateIcon.createButton("assets/icons/palette-solid.png","Farbe");
+        colourChooserButton.setSelected(false);
 
+        add(colourChooserButton);
         add(colourPanel);
     }
 
@@ -97,6 +100,7 @@ public class ToolBarView extends JPanel {
     public JToggleButton getRectangleButton() { return rectangleButton; }
 
     public JPanel getColourPanel() { return colourPanel; }
+    public JButton getColourChooserButton() { return colourChooserButton; }
     public JColorChooser getColourChooser() { return colourChooser; }
     public Color getColour() { return colourChooser.getColor(); }
 
