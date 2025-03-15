@@ -33,7 +33,7 @@ public class ToolBarView extends JPanel {
     private JButton colourChooserButton;
     private JColorChooser colourChooser;
 
-    private final Map<JToggleButton, PaintingTool> toolMapping = new HashMap<>();
+    private Map<JToggleButton, PaintingTool> toolMapping = new HashMap<>();
 
     /**
      * Constructs a new toolbar view and initialises all components.
@@ -64,10 +64,13 @@ public class ToolBarView extends JPanel {
                 .orElse(null);
     }
 
-    // Getter of the class
+    /**
+     * Getter of ToolBarView
+     */
     public JComboBox<String> getBrushSizeSelector() { return brushSizeSelector; }
 
     public ButtonGroup getPaintingToolsButtonGroup() { return paintingToolsButtonGroup; }
+
     public JToggleButton getPencilButton() { return pencilButton; }
     public JToggleButton getFillButton() { return fillButton; }
     public JToggleButton getEraserButton() { return eraserButton; }
