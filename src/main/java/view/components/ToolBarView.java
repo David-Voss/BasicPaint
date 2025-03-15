@@ -208,7 +208,7 @@ public class ToolBarView extends JPanel {
     }
 
     /**
-     * Adds a visual separator to the toolbar for better UI organisation.
+     * Adds a vertical separator to visually distinguish different sections in the toolbar.
      */
     private void addSeparator() {
         add(Box.createHorizontalStrut(2)); // Adds spacing
