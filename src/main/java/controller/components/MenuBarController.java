@@ -26,7 +26,7 @@ public class MenuBarController implements ActionListener {
     private FileHandler fileHandler;
     private boolean hasUnsavedChanges;
     private DiscardChangesHandler discardChangesHandler;
-    private PrintService printService;
+    private PrintUtility printUtility;
     private UndoRedoManager undoRedoManager;
 
     private File currentFile = null;
@@ -122,7 +122,7 @@ public class MenuBarController implements ActionListener {
         setUpFileChooser();
 
         this.discardChangesHandler = new DiscardChangesHandler(mainWindow);
-        this.printService = new PrintService();
+        this.printUtility = new PrintUtility();
         this.undoRedoManager = new UndoRedoManager(paintingModel, mainWindow);
     }
 
@@ -283,7 +283,7 @@ public class MenuBarController implements ActionListener {
      * Prints the current canvas content.
      */
     public void printPicture() {
-        printService.printPicture(mainWindow, paintingModel.getCanvas());
+        printUtility.printPicture(mainWindow, paintingModel.getCanvas());
     }
 
     /**

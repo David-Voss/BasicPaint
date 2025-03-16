@@ -33,6 +33,7 @@ public class MainWindow extends JFrame {
 
         setVisible(true);
     }
+
     /**
      * Getter methods for accessing MainWindow components.
      */
