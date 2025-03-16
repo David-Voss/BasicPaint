@@ -1,8 +1,8 @@
 package controller;
 
 import controller.components.*;
-import toolbox.FileHandler;
 import toolbox.DateTimeStamp;
+import toolbox.LoggingHelper;
 import view.MainWindow;
 
 import javax.swing.*;
@@ -42,7 +42,7 @@ public class MainController implements ActionListener {
         mainWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                System.out.println(timeStamp() + ": windowClosing() aufgerufen.");
+                LoggingHelper.log("windowClosing() aufgerufen.");
                 boolean canExit = menuBarController.confirmDiscardChanges();
                 if (!canExit) {
                     // Falls der Benutzer "Abbrechen" gedrückt hat, NICHT schließen
@@ -51,7 +51,7 @@ public class MainController implements ActionListener {
                 }
 
                 // Falls der Benutzer "Ja" oder "Nein" gewählt hat, die Anwendung beenden
-                System.out.println(timeStamp() + ": Anwendung wird geschlossen.");
+                LoggingHelper.log("Anwendung wird geschlossen.");
                 mainWindow.dispose();
                 System.exit(0);
             }
@@ -87,17 +87,13 @@ public class MainController implements ActionListener {
 
     private void showInitialValuesInConsole() {
         System.out.println(DateTimeStamp.date() + "\n" +
-                timeStamp() + ": BasicPaint gestartet. \n");
+                DateTimeStamp.time() + ": BasicPaint gestartet. \n");
 
-        System.out.println(timeStamp() + ": Initiale Werte MainWindow:");
-        System.out.println(timeStamp() + ": MainWindow Höhe = " + mainWindow.getHeight() + " px.");
-        System.out.println(timeStamp() + ": MainWindow Breite = " + mainWindow.getWidth() + " px. \n");
+        LoggingHelper.log("Initiale Werte MainWindow:");
+        LoggingHelper.log("MainWindow Höhe = " + mainWindow.getHeight() + " px.");
+        LoggingHelper.log("MainWindow Breite = " + mainWindow.getWidth() + " px. \n");
 
         mainWindow.getPaintingPanelView().getPaintingModel().showInitialPaintingModelValuesInConsole();
-    }
-
-    public static String timeStamp() {
-        return DateTimeStamp.time();
     }
 }
 

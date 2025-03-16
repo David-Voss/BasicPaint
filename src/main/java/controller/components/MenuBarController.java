@@ -13,6 +13,10 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Controller for managing interactions with the menu bar.
+ * Handles file operations, undo/redo functionalities, and user actions from the menu.
+ */
 public class MenuBarController implements ActionListener {
     private MainWindow mainWindow;
     private MainController mainController;
@@ -21,45 +25,36 @@ public class MenuBarController implements ActionListener {
 
     private FileHandler fileHandler;
     private boolean hasUnsavedChanges;
-
     private DiscardChangesHandler discardChangesHandler;
-
     private PrintService printService;
+    private UndoRedoManager undoRedoManager;
 
     private File currentFile = null;
     private JFileChooser fileChooser;
 
-    private UndoRedoManager undoRedoManager;
-
-    /*private Stack<CanvasState> undoStack = new Stack<>();
-    private Stack<CanvasState> redoStack = new Stack<>();*/
-
-
-
     private final Map<String, Runnable> actionMap = new HashMap<>();
 
+    /**
+     * Constructs the MenuBarController and initialises all menu bar functions.
+     * @param mainWindow The main application window.
+     * @param mainController The main application controller.
+     */
     public MenuBarController(MainWindow mainWindow, MainController mainController) {
         this.mainWindow = mainWindow;
         this.mainController = mainController;
         this.menuBar = mainWindow.getMenuBarView();
         this.paintingModel = mainWindow.getPaintingPanelView().getPaintingModel();
 
-        this.fileHandler = new FileHandler(paintingModel, mainWindow);
-        this.hasUnsavedChanges = false;
-        this.fileHandler.setOnSaveFileCallback(() -> hasUnsavedChanges = false);
-
-        this.fileChooser = new JFileChooser();
-        FileChooserConfigurator.configureFileChooser(this.fileChooser);
-
-        this.discardChangesHandler = new DiscardChangesHandler(mainWindow);
-
-        this.printService = new PrintService();
-
         initActionMap();
         initMenuBarFunctions();
-        this.undoRedoManager = new UndoRedoManager(paintingModel, mainWindow);
     }
 
+    /**
+     * Handles action events triggered by menu items and buttons.
+     * Executes the corresponding function mapped to the action command.
+     *
+     * @param e The action event containing the command.
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         Runnable action = actionMap.get(e.getActionCommand());
@@ -69,10 +64,17 @@ public class MenuBarController implements ActionListener {
         }
     }
 
+    /**
+     * Confirms whether unsaved changes should be discarded.
+     * @return true if the user confirms discarding changes, false otherwise.
+     */
     public boolean confirmDiscardChanges() {
         return discardChangesHandler.confirmDiscardChanges(hasUnsavedChanges, this::saveFile);
     }
 
+    /**
+     * Initialises a mapping between action commands and their corresponding methods.
+     */
     private void initActionMap() {
         actionMap.put("new", this::newFile);
         actionMap.put("open", this::openFile);
@@ -106,14 +108,27 @@ public class MenuBarController implements ActionListener {
         jButton.setActionCommand(command);
     }
 
+    /**
+     * Registers and initialises all menu bar functions including shortcuts and event listeners.
+     */
     private void initMenuBarFunctions() {
         initShortcuts();
         registerFileMenuActions();
         registerEditMenuActions();
         registerMenuBarToolBarActions();
         registerCanvasInteractionListener();
+
+        setUpFileHandler();
+        setUpFileChooser();
+
+        this.discardChangesHandler = new DiscardChangesHandler(mainWindow);
+        this.printService = new PrintService();
+        this.undoRedoManager = new UndoRedoManager(paintingModel, mainWindow);
     }
 
+    /**
+     * Sets up keyboard shortcuts for the menu items.
+     */
     private void initShortcuts() {
         // Shortcuts 'File' menu
         menuBar.getFileMenu().setMnemonic(KeyEvent.VK_D);
@@ -130,6 +145,10 @@ public class MenuBarController implements ActionListener {
         menuBar.getRedoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
     }
 
+    /**
+     * Registers action listeners for the File menu items.
+     * Associates menu items with corresponding commands.
+     */
     private void registerFileMenuActions() {
         addMenuAction(menuBar.getNewFileItem(), "new");
         addMenuAction(menuBar.getOpenFileItem(), "open");
@@ -139,11 +158,19 @@ public class MenuBarController implements ActionListener {
         addMenuAction(menuBar.getImageProperties(), "image_properties");
     }
 
+    /**
+     * Registers action listeners for the Edit menu items.
+     * Associates menu items with undo and redo commands.
+     */
     private void registerEditMenuActions() {
         addMenuAction(menuBar.getUndoItem(), "undo");
         addMenuAction(menuBar.getRedoItem(), "redo");
     }
 
+    /**
+     * Registers action listeners for toolbar buttons in the menu bar.
+     * Associates buttons with their respective file and edit operations.
+     */
     private void registerMenuBarToolBarActions() {
         addMenuAction(menuBar.getNewFileButton(), "new");
         addMenuAction(menuBar.getOpenFileButton(), "open");
@@ -153,6 +180,10 @@ public class MenuBarController implements ActionListener {
         addMenuAction(menuBar.getRedoButton(), "redo");
     }
 
+    /**
+     * Registers a listener to detect user interactions with the painting canvas.
+     * Saves the canvas state before any modification and logs unsaved changes.
+     */
     private void registerCanvasInteractionListener() {
         mainWindow.getPaintingPanelView().addMouseListener(new MouseAdapter() {
             @Override
@@ -169,6 +200,28 @@ public class MenuBarController implements ActionListener {
         });
     }
 
+    /**
+     * Initialises the file handler, responsible for file-related operations.
+     * Sets up a callback to track unsaved changes when a file is saved.
+     */
+    private void setUpFileHandler() {
+        this.fileHandler = new FileHandler(paintingModel, mainWindow);
+        this.hasUnsavedChanges = false;
+        this.fileHandler.setOnSaveFileCallback(() -> hasUnsavedChanges = false);
+    }
+
+    /**
+     * Configures the file chooser dialog for opening and saving files.
+     * Ensures appropriate file filters and settings are applied.
+     */
+    private void setUpFileChooser() {
+        this.fileChooser = new JFileChooser();
+        FileChooserConfigurator.configureFileChooser(this.fileChooser);
+    }
+
+    /**
+     * Handles opening a new file, ensuring unsaved changes are managed appropriately.
+     */
     public void newFile() {
         saveCanvasState();
 
@@ -184,6 +237,9 @@ public class MenuBarController implements ActionListener {
         }
     }
 
+    /**
+     * Handles opening an existing file and loads it onto the canvas.
+     */
     public void openFile() {
         saveCanvasState();
 
@@ -208,18 +264,32 @@ public class MenuBarController implements ActionListener {
         }
     }
 
+    /**
+     * Saves the current file.
+     * @return true if the file was successfully saved, false otherwise.
+     */
     public boolean saveFile() {
         return fileHandler.saveFile();
     }
 
+    /**
+     * Saves the file with a new user specified name/location.
+     */
     public void saveFileAs() {
         fileHandler.saveFileAs();
     }
 
+    /**
+     * Prints the current canvas content.
+     */
     public void printPicture() {
         printService.printPicture(mainWindow, paintingModel.getCanvas());
     }
 
+    /**
+     * Displays the image properties dialog.
+     * Allows the user to view and modify the image dimensions.
+     */
     public void showImagePropertiesDialog() {
         PaintingModel paintingModel = mainWindow.getPaintingPanelView().getPaintingModel();
         int currentWidth = paintingModel.getCanvas().getWidth();
@@ -239,16 +309,27 @@ public class MenuBarController implements ActionListener {
         }
     }
 
+    /**
+     * Performs an undo operation.
+     * Reverts the canvas to the previous state.
+     */
     private void undo() {
         undoRedoManager.undo();
         System.out.print("\n");
     }
 
+    /**
+     * Performs a redo operation.
+     * Restores the previously undone state.
+     */
     private void redo() {
         undoRedoManager.redo();
         System.out.print("\n");
     }
 
+    /**
+     * Saves the current state of the canvas.
+     */
     private void saveCanvasState() {
         undoRedoManager.saveCanvasState();
     }
