@@ -5,10 +5,12 @@ import toolbox.DateTimeStamp;
 import toolbox.LoggingHelper;
 import view.MainWindow;
 
-import javax.swing.*;
 import java.awt.event.*;
 
-public class MainController implements ActionListener {
+/**
+ * Main controller handling all major interactions between the UI components.
+ */
+public class MainController {
 
     private final MainWindow mainWindow;
     private final MenuBarController menuBarController;
@@ -17,8 +19,12 @@ public class MainController implements ActionListener {
     private final StatusBarController statusBarController;
 
 
+    /**
+     * Constructs the main controller and initialises all sub-controllers.
+     *
+     * @param mainWindow The main application window.
+     */
     public MainController(MainWindow mainWindow) {
-
         this.mainWindow = mainWindow;
         this.menuBarController = new MenuBarController(mainWindow, this);
         this.toolBarController = new ToolBarController(mainWindow, this);
@@ -26,66 +32,47 @@ public class MainController implements ActionListener {
         this.statusBarController = new StatusBarController(mainWindow, this);
 
         initialiseListeners();
-        showInitialValuesInConsole();
+        logInitialApplicationState();
     }
 
+    /**
+     * Getter methods for accessing MainController components.
+     */
     public MenuBarController getMenuBarController() { return menuBarController; }
     public ToolBarController getToolBarController() { return toolBarController; }
     public PaintingPanelController getPaintingPanelController() { return paintingController; }
     public StatusBarController getStatusBarController() { return statusBarController; }
 
     /**
-     * Registers action listeners for menu items and updates web search status.
+     * Registers action listeners for the main window.
+     * Prompts the user to confirm unsaved changes before exiting.
      */
     private void initialiseListeners() {
-        // Add a window listener to prompt for unsaved changes on close.
         mainWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                LoggingHelper.log("windowClosing() aufgerufen.");
-                boolean canExit = menuBarController.confirmDiscardChanges();
-                if (!canExit) {
-                    // Falls der Benutzer "Abbrechen" gedrückt hat, NICHT schließen
-                    //System.out.print(" -> Schließen abgebrochen. \n");
-                    return;
-                }
-
-                // Falls der Benutzer "Ja" oder "Nein" gewählt hat, die Anwendung beenden
-                LoggingHelper.log("Anwendung wird geschlossen.");
-                mainWindow.dispose();
-                System.exit(0);
+                handleWindowClosing();
             }
         });
     }
 
     /**
-     * Adds an action listener to a menu item with a specific action command.
-     *
-     * @param menuItem The menu item to which the listener is added.
-     * @param command  The action command for event handling.
+     * Handles window closing event, prompting for unsaved changes before exiting.
      */
-    private void addMenuAction(JMenuItem menuItem, String command) {
-        menuItem.addActionListener(this);
-        menuItem.setActionCommand(command);
+    private void handleWindowClosing() {
+        LoggingHelper.log("windowClosing() aufgerufen.");
+        if (!menuBarController.confirmDiscardChanges()) {
+            return;
+        }
+        LoggingHelper.log("Anwendung wird geschlossen.");
+        mainWindow.dispose();
+        System.exit(0);
     }
 
     /**
-     * Adds an action listener to a button with a specific action command.
-     *
-     * @param jButton The button to which the listener is added.
-     * @param command The action command for event handling.
+     * Logs the initial state of the application components.
      */
-    private void addMenuAction(JButton jButton, String command) {
-        jButton.addActionListener(this);
-        jButton.setActionCommand(command);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-    }
-
-    private void showInitialValuesInConsole() {
+    private void logInitialApplicationState() {
         System.out.println(DateTimeStamp.date() + "\n" +
                 DateTimeStamp.time() + ": BasicPaint gestartet. \n");
 
