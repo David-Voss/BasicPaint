@@ -38,7 +38,6 @@ public class FileHandler {
      */
     public void setOnSaveFileCallback(Runnable callback) {
         this.onSaveFileCallback = callback;
-        LoggingHelper.log("Datei hat keine ungespeicherten Änderungen.");
     }
 
     /**
@@ -171,6 +170,7 @@ public class FileHandler {
                 LoggingHelper.log("Speichern erfolgreich!");
                 if (onSaveFileCallback != null) {
                     onSaveFileCallback.run();  // Sets 'hasUnsavedChanges = false' in MenuBarController
+                    LoggingHelper.log("Bild hat keine ungespeicherten Änderungen.");
                 }
             } else {
                 throw new IOException(DateTimeStamp.time() + ": Fehler beim Speichern des Bildes. \n");
