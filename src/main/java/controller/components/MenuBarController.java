@@ -27,6 +27,8 @@ public class MenuBarController implements ActionListener {
 
     private DiscardChangesHandler discardChangesHandler;
 
+    private PrintService printService;
+
     private File currentFile = null;
     private JFileChooser fileChooser;
 
@@ -46,6 +48,8 @@ public class MenuBarController implements ActionListener {
         FileChooserConfigurator.configureFileChooser(this.fileChooser);
 
         this.discardChangesHandler = new DiscardChangesHandler(mainWindow);
+
+        this.printService = new PrintService();
 
         initMenuBarFunctions();
         updateUndoRedoState();
@@ -235,21 +239,25 @@ public class MenuBarController implements ActionListener {
         fileHandler.saveFileAs();
     }
 
-    private void printPicture() {
+    /*private void printPicture() {
         PrinterJob job = PrinterJob.getPrinterJob();
         job.setPrintable((graphics, pageFormat, pageIndex) -> {
             if (pageIndex > 0) {
                 return Printable.NO_SUCH_PAGE;
             }
+
             double scaleX = pageFormat.getImageableWidth() / paintingModel.getCanvas().getWidth();
             double scaleY = pageFormat.getImageableHeight() / paintingModel.getCanvas().getHeight();
             double scale = Math.min(scaleX, scaleY);
+
             Graphics2D g2d = (Graphics2D) graphics;
             g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
             g2d.scale(scale, scale);
             g2d.drawImage(paintingModel.getCanvas(), 0, 0, null);
+
             return Printable.PAGE_EXISTS;
         });
+
         if (job.printDialog()) {
             try {
                 job.print();
@@ -257,6 +265,10 @@ public class MenuBarController implements ActionListener {
                 JOptionPane.showMessageDialog(mainWindow, "Fehler beim Drucken.", "Fehler", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }*/
+
+    public void printPicture() {
+        printService.printPicture(mainWindow, paintingModel.getCanvas());
     }
 
     public void showImagePropertiesDialog() {
