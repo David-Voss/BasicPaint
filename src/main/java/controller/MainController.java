@@ -83,4 +83,3 @@ public class MainController {
         mainWindow.getPaintingPanelView().getPaintingModel().showInitialPaintingModelValuesInConsole();
     }
 }
-
