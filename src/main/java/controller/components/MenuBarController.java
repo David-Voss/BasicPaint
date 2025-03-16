@@ -11,6 +11,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 public class MenuBarController implements ActionListener {
@@ -29,8 +31,14 @@ public class MenuBarController implements ActionListener {
     private File currentFile = null;
     private JFileChooser fileChooser;
 
-    private Stack<CanvasState> undoStack = new Stack<>();
-    private Stack<CanvasState> redoStack = new Stack<>();
+    private UndoRedoManager undoRedoManager;
+
+    /*private Stack<CanvasState> undoStack = new Stack<>();
+    private Stack<CanvasState> redoStack = new Stack<>();*/
+
+
+
+    private final Map<String, Runnable> actionMap = new HashMap<>();
 
     public MenuBarController(MainWindow mainWindow, MainController mainController) {
         this.mainWindow = mainWindow;
@@ -40,6 +48,7 @@ public class MenuBarController implements ActionListener {
 
         this.fileHandler = new FileHandler(paintingModel, mainWindow);
         this.hasUnsavedChanges = false;
+        this.fileHandler.setOnFileSavedCallback(() -> hasUnsavedChanges = false);
 
         this.fileChooser = new JFileChooser();
         FileChooserConfigurator.configureFileChooser(this.fileChooser);
@@ -48,56 +57,33 @@ public class MenuBarController implements ActionListener {
 
         this.printService = new PrintService();
 
+        initActionMap();
         initMenuBarFunctions();
-        updateUndoRedoState();
+        this.undoRedoManager = new UndoRedoManager(paintingModel, mainWindow);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Runnable action = actionMap.get(e.getActionCommand());
+        if (action != null) {
+            LoggingHelper.log(e.getActionCommand() + "() aufgerufen.");
+            action.run();
+        }
     }
 
     public boolean confirmDiscardChanges() {
         return discardChangesHandler.confirmDiscardChanges(hasUnsavedChanges, this::saveFile);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        String actionCommand = e.getActionCommand();
-
-        switch (actionCommand) {
-            // 'File' menu actions
-            case "new":
-                LoggingHelper.log("newFile() aufgerufen.");
-                newFile();
-                break;
-            case "open":
-                LoggingHelper.log("openFile() aufgerufen.");
-                openFile();
-                break;
-            case "save":
-                LoggingHelper.log("saveFile() aufgerufen.");
-                saveFile();
-                break;
-            case "save_as":
-                LoggingHelper.log("saveFileAs() aufgerufen.");
-                saveFileAs();
-                break;
-            case "print":
-                LoggingHelper.log("printPicture() aufgerufen.");
-                printPicture();
-                break;
-            case "image_properties":
-                LoggingHelper.log("showImagePropertiesDialog() aufgerufen.");
-                showImagePropertiesDialog();
-                break;
-            // 'Edit' menu actions
-            case "undo":
-                LoggingHelper.log("undo() aufgerufen. \n");
-                undo();
-                break;
-            case "redo":
-                LoggingHelper.log("redo() aufgerufen. \n");
-                redo();
-                break;
-            default:
-                break;
-        }
+    private void initActionMap() {
+        actionMap.put("new", this::newFile);
+        actionMap.put("open", this::openFile);
+        actionMap.put("save", this::saveFile);
+        actionMap.put("save_as", this::saveFileAs);
+        actionMap.put("print", this::printPicture);
+        actionMap.put("image_properties", this::showImagePropertiesDialog);
+        actionMap.put("undo", this::undo);
+        actionMap.put("redo", this::redo);
     }
 
     /**
@@ -194,9 +180,7 @@ public class MenuBarController implements ActionListener {
             currentFile = null;
             mainWindow.setTitle("BasicPaint | Unbenannt");
 
-            undoStack.clear();
-            redoStack.clear();
-            updateUndoRedoState();
+            undoRedoManager.clearHistory();
 
             SwingUtilities.invokeLater(() -> mainWindow.getPaintingPanelView().repaint());
         }
@@ -213,9 +197,7 @@ public class MenuBarController implements ActionListener {
                         .resizePanelWhenOpenedFileIsWiderOrHigher(image.getWidth(), image.getHeight());
 
                 hasUnsavedChanges = false;
-                undoStack.clear();
-                redoStack.clear();
-                updateUndoRedoState();
+                undoRedoManager.clearHistory();
 
                 File openedFile = fileHandler.getCurrentFile();
                 if (openedFile != null) {
@@ -260,102 +242,16 @@ public class MenuBarController implements ActionListener {
     }
 
     private void undo() {
-        if (!undoStack.isEmpty()) {
-            redoStack.push(new CanvasState(copyImage(paintingModel.getCanvas()),
-                    paintingModel.getCanvas().getWidth(),
-                    paintingModel.getCanvas().getHeight(),
-                    (currentFile != null) ? currentFile.getName() : "Unbenannt"));
-
-            CanvasState previousState = undoStack.pop();
-            paintingModel.setCanvas(previousState.image);
-            currentFile = new File(previousState.fileName);
-            mainWindow.setTitle("BasicPaint | " + previousState.fileName);
-
-            mainWindow.getPaintingPanelView().repaint();
-            updateUndoRedoState();
-        }
+        undoRedoManager.undo();
+        System.out.print("\n");
     }
 
     private void redo() {
-        if (!redoStack.isEmpty()) {
-            undoStack.push(new CanvasState(copyImage(paintingModel.getCanvas()),
-                    paintingModel.getCanvas().getWidth(),
-                    paintingModel.getCanvas().getHeight(),
-                    (currentFile != null) ? currentFile.getName() : "Unbenannt"));
-
-            CanvasState nextState = redoStack.pop();
-            paintingModel.setCanvas(nextState.image);
-            currentFile = new File(nextState.fileName);
-            mainWindow.setTitle("BasicPaint | " + nextState.fileName);
-
-            mainWindow.getPaintingPanelView().repaint();
-            updateUndoRedoState();
-        }
-    }
-
-    private void updateUndoRedoState() {
-        boolean canUndo = !undoStack.isEmpty();
-        boolean canRedo = !redoStack.isEmpty();
-
-        menuBar.getUndoItem().setEnabled(canUndo);
-        menuBar.getUndoButton().setEnabled(canUndo);
-
-        menuBar.getRedoItem().setEnabled(canRedo);
-        menuBar.getRedoButton().setEnabled(canRedo);
+        undoRedoManager.redo();
+        System.out.print("\n");
     }
 
     private void saveCanvasState() {
-        BufferedImage currentState = copyImage(paintingModel.getCanvas());
-        int currentWidth = paintingModel.getCanvas().getWidth();
-        int currentHeight = paintingModel.getCanvas().getHeight();
-        String currentFileName = (currentFile != null) ? currentFile.getName() : "Unbenannt";
-
-        // Falls sich nichts geändert hat, speichern wir nicht doppelt
-        if (!undoStack.isEmpty() && imagesAreEqual(undoStack.peek().image, currentState)
-                && undoStack.peek().width == currentWidth
-                && undoStack.peek().height == currentHeight) {
-            return;
-        }
-
-        undoStack.push(new CanvasState(currentState, currentWidth, currentHeight, currentFileName));
-        redoStack.clear(); // Redo wird ungültig, sobald eine neue Aktion passiert
-        updateUndoRedoState();
-    }
-
-    private boolean imagesAreEqual(BufferedImage img1, BufferedImage img2) {
-        if (img1.getWidth() != img2.getWidth() || img1.getHeight() != img2.getHeight()) {
-            return false;
-        }
-        for (int y = 0; y < img1.getHeight(); y++) {
-            for (int x = 0; x < img1.getWidth(); x++) {
-                if (img1.getRGB(x, y) != img2.getRGB(x, y)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private BufferedImage copyImage(BufferedImage image) {
-        if (image == null) return null;
-        BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-        Graphics2D g = copy.createGraphics();
-        g.drawImage(image, 0, 0, null);
-        g.dispose();
-        return copy;
-    }
-
-    private static class CanvasState {
-        BufferedImage image;
-        int width;
-        int height;
-        String fileName;
-
-        public CanvasState(BufferedImage image, int width, int height, String fileName) {
-            this.image = image;
-            this.width = width;
-            this.height = height;
-            this.fileName = fileName;
-        }
+        undoRedoManager.saveCanvasState();
     }
 }

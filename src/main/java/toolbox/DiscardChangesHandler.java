@@ -98,7 +98,7 @@ public class DiscardChangesHandler {
 
     private boolean handleUserSelection(Object selectedValue, BooleanSupplier saveCallback) {
         if (selectedValue == null || selectedValue.equals("Abbrechen")) {
-            LoggingHelper.log("Abbrechen gewählt.");
+            LoggingHelper.log("Abbrechen gewählt. \n");
             return false;
         }
         if (selectedValue.equals("Ja")) {
@@ -108,14 +108,14 @@ public class DiscardChangesHandler {
             boolean saveSuccessful = saveCallback.getAsBoolean();
 
             if (!saveSuccessful) {
-                LoggingHelper.log("Speichern wurde abgebrochen oder ist fehlgeschlagen.");
+                LoggingHelper.log("Speichern abgebrochen oder fehlgeschlagen. \n");
                 return false; // Falls Speichern fehlschlägt, den Abbruch weitergeben.
             }
 
             return true;
         }
         if (selectedValue.equals("Nein")) {
-            LoggingHelper.log("Nein gewählt -> Änderungen wurden nicht gespeichert.");
+            LoggingHelper.log("Nein gewählt -> Änderungen wurden nicht gespeichert. \n");
         }
         return true;
     }

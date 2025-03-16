@@ -7,8 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 /**
  * Handles file operations like opening, saving, and managing images.
@@ -18,6 +17,8 @@ public class FileHandler {
     private File currentFile;
     private PaintingModel paintingModel;
     private Component parent;
+
+    private Runnable onFileSavedCallback;
 
     /**
      * Constructs a new FileHandler with the given PaintingModel.
@@ -64,6 +65,7 @@ public class FileHandler {
                 return null;
             }
             currentFile = file;
+            LoggingHelper.log("Bild geöffnet: " + currentFile.getName());
             return image;
         } catch (IOException e) {
             JOptionPane.showMessageDialog(parent,
@@ -108,7 +110,11 @@ public class FileHandler {
         }
 
         currentFile = selectedFile;
-        return writeFile(currentFile);
+        boolean success = writeFile(currentFile);
+        if (success) {
+            updateWindowTitle(); // **HINZUGEFÜGT**
+        }
+        return success;
     }
 
     /**
@@ -131,8 +137,12 @@ public class FileHandler {
 
             String format = file.getName().toLowerCase().endsWith(".png") ? "png" : "jpg";
             boolean success = ImageIO.write(image, format, file) || ImageIO.write(convertImage(image), format, file);
-
-            if (!success) {
+            if (success) {
+                LoggingHelper.log("Speichern erfolgreich!");
+                if (onFileSavedCallback != null) {
+                    onFileSavedCallback.run();  // ✅ `hasUnsavedChanges = false` wird in MenuBarController gesetzt
+                }
+            } else {
                 throw new IOException(DateTimeStamp.time() + ": Fehler beim Speichern des Bildes. \n");
             }
 
@@ -147,6 +157,18 @@ public class FileHandler {
         }
     }
 
+    private void updateWindowTitle() {
+        if (parent instanceof JFrame && currentFile != null) {
+            ((JFrame) parent).setTitle("BasicPaint | " + currentFile.getName());
+        }
+    }
+
+    public void setOnFileSavedCallback(Runnable callback) {
+        this.onFileSavedCallback = callback;
+        LoggingHelper.log("Datei hat keine ungespeicherten Änderungen.");
+    }
+
+
     /**
      * Converts an image to a supported format if necessary.
      * @param image The image to convert.
@@ -158,56 +180,6 @@ public class FileHandler {
         g.drawImage(image, 0, 0, null);
         g.dispose();
         return formattedImage;
-    }
-
-    /**
-     * Opens a file chooser dialog to load a JPEG image file.
-     * Only files with extensions ".jpg" or ".jpeg" are displayed.
-     * @param parent the parent component for the dialog
-     * @return a BufferedImage of the selected file, or null if cancelled or an error occurred
-     */
-    public BufferedImage openImage(Component parent) {
-        JFileChooser chooser = new JFileChooser();
-        FileChooserConfigurator.configureFileChooser(chooser);
-
-        int result = chooser.showOpenDialog(parent);
-        if (result != JFileChooser.APPROVE_OPTION) {
-            return null; // User hat abgebrochen
-        }
-
-        File file = chooser.getSelectedFile();
-
-        // ❗ Sicherstellen, dass file nicht null ist
-        if (file == null) {
-            LoggingHelper.log("Keine Datei ausgewählt. \n");
-            return null;
-        }
-
-        // ❗ Verhindern, dass ein Ordner geöffnet wird
-        if (file.isDirectory()) {
-            chooser.setCurrentDirectory(file);  // Falls Ordner, einfach öffnen
-            return null;  // Nicht versuchen, das als Bild zu lesen
-        }
-
-        try {
-            BufferedImage img = ImageIO.read(file);
-            if (img == null) {
-                JOptionPane.showMessageDialog(parent,
-                        "Die ausgewählte Datei konnte nicht geöffnet werden. \n" +
-                                "Möglicherweise wird das Format nicht unterstützt oder die Datei ist beschädigt.",
-                        "Dateiöffnungsfehler",
-                        JOptionPane.ERROR_MESSAGE);
-                return null;
-            }
-            currentFile = file;
-            return img;
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(parent,
-                    "Fehler beim Laden der Datei:\n" + e.getMessage(),
-                    "Dateiöffnungsfehler",
-                    JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
     }
 
     /**
