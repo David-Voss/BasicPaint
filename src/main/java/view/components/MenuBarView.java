@@ -47,7 +47,7 @@ public class MenuBarView extends JMenuBar{
     }
 
     /**
-     * Getter methods for accessing menu components.
+     * Getter methods for accessing MenuBar components.
      */
     // File menu getter
     public JMenu getFileMenu() { return fileMenu; }

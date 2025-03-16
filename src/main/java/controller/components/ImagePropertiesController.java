@@ -131,7 +131,7 @@ public class ImagePropertiesController {
             model.setSizeInPixels(pixelWidth, pixelHeight);
 
             // 5️⃣ Neue Einheit setzen und Werte konvertieren
-            model.convertToUnit(newUnit);
+            model.convertUnit(newUnit);
 
             // 6️⃣ UI-Felder mit den umgerechneten Werten aktualisieren
             updateViewFields();

@@ -60,7 +60,7 @@ public class PaintingPanelController {
                 } else {
                     if (!isDragging) {
                         System.out.println(timeStamp() + ": Zeichenfläche wird bearbeitet. \n" +
-                                timeStamp() + ": Tool: " + toolBarView.getSelectedTool());
+                                timeStamp() + ": Tool: " + toolBarView.getSelectedTool().getDisplayName());
                     }
 
                     startPoint = e.getPoint();
