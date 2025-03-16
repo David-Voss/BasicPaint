@@ -75,7 +75,7 @@ public class FileHandler {
                 return null;
             }
             currentFile = file;
-            LoggingHelper.log("Bild geöffnet: " + currentFile.getName());
+            LoggingHelper.log("Bild geöffnet: " + currentFile.getName() + "\n");
             return image;
         } catch (IOException e) {
             JOptionPane.showMessageDialog(parent,

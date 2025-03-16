@@ -1,7 +1,5 @@
 package toolbox;
 
-import controller.MainController;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -10,26 +8,43 @@ import java.io.File;
 
 /**
  * Configures a {@link JFileChooser} to enhance usability.
- * Provides better keyboard navigation and ENTER key handling.
+ * <p>
+ * - Enables keyboard navigation with the ENTER key
+ * - Automatically adds image file filters
+ * - Supports seamless navigation into directories
+ * </p>
  */
 public class FileChooserConfigurator {
 
     /**
      * Configures the given file chooser.
-     * Ensures that the ENTER key can be used to select a file or confirm a button press.
+     * <p>
+     * - Adds standard image file filters
+     * - Enables keyboard shortcuts for improved usability
+     * - Ensures ENTER selects a file or navigates into directories
+     * </p>
      *
      * @param fileChooser The {@link JFileChooser} to configure.
      */
     public static void configureFileChooser(JFileChooser fileChooser) {
+        if (fileChooser == null) {
+            throw new IllegalArgumentException(LoggingHelper.formatMessage("FileChooser kann nicht 'null' sein. \n"));
+        }
+
         fileChooser.setFocusable(true);
         fileChooser.requestFocusInWindow();
-
-        setFileChooserImageFilter(fileChooser);
-
-        // Activate "all Files" filter option
         fileChooser.setAcceptAllFileFilterUsed(true);
 
-        // Map ENTER key to either select a file or trigger a focused button
+        setFileChooserImageFilter(fileChooser);
+        configureEnterKeyHandling(fileChooser);
+    }
+
+    /**
+     * Configures the ENTER key behaviour for selecting files and navigating directories.
+     *
+     * @param fileChooser The file chooser to enhance.
+     */
+    private static void configureEnterKeyHandling(JFileChooser fileChooser) {
         fileChooser.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke("ENTER"), "confirmSelection");
 
@@ -39,7 +54,7 @@ public class FileChooserConfigurator {
                 Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 
                 if (focusOwner instanceof JButton) {
-                    ((JButton) focusOwner).doClick(); // Simuliert einen Button-Klick
+                    ((JButton) focusOwner).doClick(); // Simulate button click
                 } else if (focusOwner instanceof JList) {
                     JList<?> fileList = (JList<?>) focusOwner;
                     Object selectedObject = fileList.getSelectedValue();
@@ -48,11 +63,11 @@ public class FileChooserConfigurator {
                         File selectedFile = (File) selectedObject;
 
                         if (selectedFile.isDirectory()) {
-                            // ✅ Falls Ordner, navigiere in den Ordner statt ihn zu bestätigen
+                            // Navigate into the selected directory instead of confirming it
                             fileChooser.setCurrentDirectory(selectedFile);
-                            fileChooser.rescanCurrentDirectory(); // Aktualisiert die Ansicht
+                            fileChooser.rescanCurrentDirectory();
                         } else {
-                            // ✅ Falls Datei, bestätige die Auswahl
+                            // Confirm file selection
                             fileChooser.setSelectedFile(selectedFile);
                             fileChooser.approveSelection();
                         }
@@ -60,9 +75,13 @@ public class FileChooserConfigurator {
                 }
             }
         });
-
     }
 
+    /**
+     * Adds predefined file filters for image selection.
+     *
+     * @param fileChooser The file chooser to configure.
+     */
     private static void setFileChooserImageFilter(JFileChooser fileChooser) {
         // Generate file filters
         FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter("JPEG Bilder (*.jpg, *.jpeg)", "jpg", "jpeg");

@@ -20,7 +20,7 @@ public class LoggingHelper {
      * @param message The original message.
      * @return A formatted string with a timestamp.
      */
-    private static String formatMessage(String message) {
+    public static String formatMessage(String message) {
         return DateTimeStamp.time() + ": " + message;
     }
 }
