@@ -2,16 +2,11 @@ package controller.components;
 
 import controller.MainController;
 import model.PaintingModel;
-import toolbox.FileChooserConfigurator;
-import toolbox.FileHandler;
-import toolbox.DateTimeStamp;
+import toolbox.*;
 import view.MainWindow;
 import view.components.MenuBarView;
-import view.components.PaintingPanelView;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -19,7 +14,6 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.File;
-import java.io.IOException;
 import java.util.Stack;
 
 public class MenuBarController implements ActionListener {
@@ -30,6 +24,8 @@ public class MenuBarController implements ActionListener {
 
     private FileHandler fileHandler;
     private boolean hasUnsavedChanges;
+
+    private DiscardChangesHandler discardChangesHandler;
 
     private File currentFile = null;
     private JFileChooser fileChooser;
@@ -49,8 +45,14 @@ public class MenuBarController implements ActionListener {
         this.fileChooser = new JFileChooser();
         FileChooserConfigurator.configureFileChooser(this.fileChooser);
 
+        this.discardChangesHandler = new DiscardChangesHandler(mainWindow);
+
         initMenuBarFunctions();
         updateUndoRedoState();
+    }
+
+    public boolean confirmDiscardChanges() {
+        return discardChangesHandler.confirmDiscardChanges(hasUnsavedChanges, this::saveFile);
     }
 
     @Override
@@ -60,36 +62,36 @@ public class MenuBarController implements ActionListener {
         switch (actionCommand) {
             // 'File' menu actions
             case "new":
-                System.out.println(timeStamp() + ": newFile() aufgerufen.");
+                LoggingHelper.log("newFile() aufgerufen.");
                 newFile();
                 break;
             case "open":
-                System.out.println(timeStamp() + ": openFile() aufgerufen.");
+                LoggingHelper.log("openFile() aufgerufen.");
                 openFile();
                 break;
             case "save":
-                System.out.println(timeStamp() + ": saveFile() aufgerufen.");
+                LoggingHelper.log("saveFile() aufgerufen.");
                 saveFile();
                 break;
             case "save_as":
-                System.out.println(timeStamp() + ": saveFileAs() aufgerufen.");
+                LoggingHelper.log("saveFileAs() aufgerufen.");
                 saveFileAs();
                 break;
             case "print":
-                System.out.println(timeStamp() + ": printPicture() aufgerufen.");
+                LoggingHelper.log("printPicture() aufgerufen.");
                 printPicture();
                 break;
             case "image_properties":
-                System.out.println(timeStamp() + ": showImagePropertiesDialog() aufgerufen.");
+                LoggingHelper.log("showImagePropertiesDialog() aufgerufen.");
                 showImagePropertiesDialog();
                 break;
             // 'Edit' menu actions
             case "undo":
-                System.out.println("timeStamp() + \": undo() aufgerufen. \n");
+                LoggingHelper.log("undo() aufgerufen. \n");
                 undo();
                 break;
             case "redo":
-                System.out.println("timeStamp() + \": redo() aufgerufen. \n");
+                LoggingHelper.log("redo() aufgerufen. \n");
                 redo();
                 break;
             default:
@@ -174,8 +176,8 @@ public class MenuBarController implements ActionListener {
                 saveCanvasState();
 
                 if (!hasUnsavedChanges) {
-                    System.out.println(timeStamp() + ": Zeichenfläche Bearbeitet. \n" +
-                            timeStamp() + ": Bild hat ungespeicherte Änderungen. \n");
+                    LoggingHelper.log("Zeichenfläche Bearbeitet. \n" +
+                            DateTimeStamp.time() + ": Bild hat ungespeicherte Änderungen. \n");
                     hasUnsavedChanges = true;
                 }
             }
@@ -272,7 +274,7 @@ public class MenuBarController implements ActionListener {
             int newHeight = controller.getImageHeight();
 
             mainController.getPaintingPanelController().setCanvasSize(newWidth, newHeight);
-            System.out.println(timeStamp() + ": Neue Größe gesetzt: " + newWidth + "x" + newHeight + "\n");
+            LoggingHelper.log("Neue Größe gesetzt: " + newWidth + "x" + newHeight + "\n");
         }
     }
 
@@ -321,7 +323,6 @@ public class MenuBarController implements ActionListener {
         menuBar.getRedoButton().setEnabled(canRedo);
     }
 
-
     private void saveCanvasState() {
         BufferedImage currentState = copyImage(paintingModel.getCanvas());
         int currentWidth = paintingModel.getCanvas().getWidth();
@@ -339,7 +340,6 @@ public class MenuBarController implements ActionListener {
         redoStack.clear(); // Redo wird ungültig, sobald eine neue Aktion passiert
         updateUndoRedoState();
     }
-
 
     private boolean imagesAreEqual(BufferedImage img1, BufferedImage img2) {
         if (img1.getWidth() != img2.getWidth() || img1.getHeight() != img2.getHeight()) {
@@ -362,102 +362,6 @@ public class MenuBarController implements ActionListener {
         g.drawImage(image, 0, 0, null);
         g.dispose();
         return copy;
-    }
-
-    public boolean confirmDiscardChanges() {
-        if (!hasUnsavedChanges) {
-            return true; // Keine ungespeicherten Änderungen, kein Bestätigungsdialog notwendig.
-        }
-
-        // Erstelle eine Option-Pane mit den Buttons "Ja", "Nein" und "Abbrechen"
-        String[] options = {"Ja", "Nein", "Abbrechen"};
-        JOptionPane optionPane = new JOptionPane(
-                "Die aktuelle Zeichnung wurde nicht gespeichert. Bild speichern?",
-                JOptionPane.WARNING_MESSAGE,
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                null,
-                options,
-                options[0]); // Standard ist "Ja"
-
-        // Erstelle den Dialog
-        JDialog dialog = optionPane.createDialog(mainWindow, "Ungespeicherte Änderungen");
-        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-
-        // **Schließen mit X = "Abbrechen"**
-        dialog.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                optionPane.setValue("Abbrechen");
-                dialog.setVisible(false);
-                dialog.dispose();
-            }
-        });
-
-        // **ALLE Buttons holen**
-        JButton yesButton = null, noButton = null, cancelButton = null;
-        for (Component c : optionPane.getComponents()) {
-            if (c instanceof JPanel) {
-                for (Component btn : ((JPanel) c).getComponents()) {
-                    if (btn instanceof JButton) {
-                        JButton button = (JButton) btn;
-                        if (button.getText().equals("Ja")) yesButton = button;
-                        if (button.getText().equals("Nein")) noButton = button;
-                        if (button.getText().equals("Abbrechen")) cancelButton = button;
-                    }
-                }
-            }
-        }
-
-        // **ENTER- und ESC-KEY LISTENER HINZUFÜGEN**
-        KeyAdapter keyListener = new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-                    if (focusOwner instanceof JButton) {
-                        ((JButton) focusOwner).doClick(); // Nur Button mit Fokus drücken!
-                    }
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    optionPane.setValue("Abbrechen");
-                    dialog.setVisible(false);
-                    dialog.dispose();
-                }
-            }
-        };
-
-        // **KeyListener für den gesamten Dialog setzen**
-        dialog.addKeyListener(keyListener);
-        dialog.setFocusable(true);
-        dialog.requestFocusInWindow();
-
-        // **KeyListener für alle Buttons setzen**
-        if (yesButton != null) yesButton.addKeyListener(keyListener);
-        if (noButton != null) noButton.addKeyListener(keyListener);
-        if (cancelButton != null) cancelButton.addKeyListener(keyListener);
-
-        // Dialog anzeigen
-        dialog.setVisible(true);
-
-        // Ergebnis ermitteln
-        Object selectedValue = optionPane.getValue();
-
-        if (selectedValue == null || selectedValue.equals("Abbrechen")) {
-            System.out.println(timeStamp() + ": Abbrechen gewählt.");
-            return false;
-        }
-        if (selectedValue.equals("Ja")) {
-            System.out.println(timeStamp() + ": Ja gewählt -> saveFile() wird aufgerufen.");
-            return saveFile(); // Falls speichern fehlschlägt, Abbruch
-        }
-        if (selectedValue.equals("Nein")) {
-            System.out.println(timeStamp() + ": Nein gewählt -> Änderungen wurden nicht gespeichert.");
-        }
-
-        return true;
-    }
-
-    private String timeStamp() {
-        return DateTimeStamp.time();
     }
 
     private static class CanvasState {

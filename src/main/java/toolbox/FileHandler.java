@@ -80,6 +80,7 @@ public class FileHandler {
      */
     public boolean saveFile() {
         if (currentFile == null) {
+            LoggingHelper.log("Datei noch nicht vorhanden -> saveFileAs() wird aufgerufen.");
             return saveFileAs();
         }
         return writeFile(currentFile);
@@ -135,7 +136,7 @@ public class FileHandler {
                 throw new IOException(DateTimeStamp.time() + ": Fehler beim Speichern des Bildes. \n");
             }
 
-            LoggingHelper.log("Datei gespeichert: " + file.getAbsolutePath() + "\n");
+            LoggingHelper.log("Datei " + file.getName() + " gespeichert: " + file.getAbsolutePath() + "\n");
             return true;
         } catch (IOException e) {
             JOptionPane.showMessageDialog(parent,
