@@ -7,14 +7,29 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.function.BooleanSupplier;
 
+/**
+ * Handles user confirmation when discarding unsaved changes.
+ */
 public class DiscardChangesHandler {
 
     private final MainWindow mainWindow;
 
+    /**
+     * Constructs the DiscardChangesHandler.
+     *
+     * @param mainWindow The main application window.
+     */
     public DiscardChangesHandler(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
     }
 
+    /**
+     * Asks the user whether to discard unsaved changes.
+     *
+     * @param hasUnsavedChanges {@code true} if there are unsaved changes.
+     * @param saveCallback      Callback to attempt saving the changes.
+     * @return {@code true} if changes can be discarded, otherwise {@code false}.
+     */
     public boolean confirmDiscardChanges(boolean hasUnsavedChanges, BooleanSupplier saveCallback) {
         if (!hasUnsavedChanges) {
             return true;
@@ -23,6 +38,12 @@ public class DiscardChangesHandler {
         return showDiscardChangesDialog(saveCallback);
     }
 
+    /**
+     * Displays a confirmation dialog for unsaved changes.
+     *
+     * @param saveCallback Callback for saving before discarding changes.
+     * @return {@code true} if the user confirms discarding changes.
+     */
     private boolean showDiscardChangesDialog(BooleanSupplier saveCallback) {
         String[] options = {"Ja", "Nein", "Abbrechen"};
         JOptionPane optionPane = new JOptionPane(
@@ -44,6 +65,12 @@ public class DiscardChangesHandler {
         return handleUserSelection(optionPane.getValue(), saveCallback);
     }
 
+    /**
+     * Adds a listener to handle window close events.
+     *
+     * @param dialog     The dialog to add the listener to.
+     * @param optionPane The associated option pane.
+     */
     private void addWindowCloseListener(JDialog dialog, JOptionPane optionPane) {
         dialog.addWindowListener(new WindowAdapter() {
             @Override
@@ -55,9 +82,20 @@ public class DiscardChangesHandler {
         });
     }
 
+    /**
+     * Adds keyboard listeners to enable interaction via the keyboard.
+     * <p>
+     * - The <b>Enter</b> key triggers the currently focused button.
+     * - The <b>Escape</b> key selects "Abbrechen" (Cancel) and closes the dialog.
+     * </p>
+     *
+     * @param dialog     The dialog to which the listeners will be added.
+     * @param optionPane The JOptionPane containing the buttons.
+     */
     private void addKeyboardListeners(JDialog dialog, JOptionPane optionPane) {
         JButton yesButton = null, noButton = null, cancelButton = null;
 
+        // Find buttons inside the JOptionPane
         for (Component c : optionPane.getComponents()) {
             if (c instanceof JPanel) {
                 for (Component btn : ((JPanel) c).getComponents()) {
@@ -71,6 +109,7 @@ public class DiscardChangesHandler {
             }
         }
 
+        // Key listener to handle Enter and Escape keys
         KeyAdapter keyListener = new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -87,6 +126,7 @@ public class DiscardChangesHandler {
             }
         };
 
+        // Apply listeners to dialog and buttons
         dialog.addKeyListener(keyListener);
         dialog.setFocusable(true);
         dialog.requestFocusInWindow();
@@ -96,6 +136,13 @@ public class DiscardChangesHandler {
         if (cancelButton != null) cancelButton.addKeyListener(keyListener);
     }
 
+    /**
+     * Handles the user's selection from the dialog.
+     *
+     * @param selectedValue The selected option.
+     * @param saveCallback  The callback function to save changes.
+     * @return {@code true} if changes can be discarded, otherwise {@code false}.
+     */
     private boolean handleUserSelection(Object selectedValue, BooleanSupplier saveCallback) {
         if (selectedValue == null || selectedValue.equals("Abbrechen")) {
             LoggingHelper.log("Abbrechen gewählt. \n");
@@ -104,12 +151,11 @@ public class DiscardChangesHandler {
         if (selectedValue.equals("Ja")) {
             LoggingHelper.log("Ja gewählt -> Speichern wird versucht.");
 
-            // Speichern ausführen und Erfolg prüfen
-            boolean saveSuccessful = saveCallback.getAsBoolean();
+            // Execute save and check success
+            boolean isSaveSuccessful = saveCallback.getAsBoolean();
 
-            if (!saveSuccessful) {
+            if (!isSaveSuccessful) {
                 LoggingHelper.log("Speichern abgebrochen oder fehlgeschlagen. \n");
-                return false; // Falls Speichern fehlschlägt, den Abbruch weitergeben.
             }
 
             return true;
