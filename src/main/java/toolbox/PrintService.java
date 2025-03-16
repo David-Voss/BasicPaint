@@ -7,10 +7,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.print.*;
 
-public class PrintService {
+public class PrintService extends JPanel {
 
     public void printPicture(MainWindow mainWindow, BufferedImage image) {
         PrinterJob job = PrinterJob.getPrinterJob();
+
         job.setPrintable(new Printable() {
             @Override
             public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) {
@@ -34,11 +35,12 @@ public class PrintService {
         if (job.printDialog()) {
             try {
                 job.print();
+                LoggingHelper.log("Bild wird gedruckt. \n");
             } catch (PrinterException e) {
                 JOptionPane.showMessageDialog(mainWindow, "Fehler beim Drucken.", "Fehler", JOptionPane.ERROR_MESSAGE);
                 LoggingHelper.log("Drucken Fehlgeschlagen. \n");
             }
-            LoggingHelper.log("Bild gedruckt. \n");
+
         }
     }
 }

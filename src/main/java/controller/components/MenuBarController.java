@@ -10,9 +10,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.awt.print.Printable;
-import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
 import java.io.File;
 import java.util.Stack;
 
@@ -238,34 +235,6 @@ public class MenuBarController implements ActionListener {
     public void saveFileAs() {
         fileHandler.saveFileAs();
     }
-
-    /*private void printPicture() {
-        PrinterJob job = PrinterJob.getPrinterJob();
-        job.setPrintable((graphics, pageFormat, pageIndex) -> {
-            if (pageIndex > 0) {
-                return Printable.NO_SUCH_PAGE;
-            }
-
-            double scaleX = pageFormat.getImageableWidth() / paintingModel.getCanvas().getWidth();
-            double scaleY = pageFormat.getImageableHeight() / paintingModel.getCanvas().getHeight();
-            double scale = Math.min(scaleX, scaleY);
-
-            Graphics2D g2d = (Graphics2D) graphics;
-            g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-            g2d.scale(scale, scale);
-            g2d.drawImage(paintingModel.getCanvas(), 0, 0, null);
-
-            return Printable.PAGE_EXISTS;
-        });
-
-        if (job.printDialog()) {
-            try {
-                job.print();
-            } catch (PrinterException e) {
-                JOptionPane.showMessageDialog(mainWindow, "Fehler beim Drucken.", "Fehler", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }*/
 
     public void printPicture() {
         printService.printPicture(mainWindow, paintingModel.getCanvas());
