@@ -10,20 +10,20 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 /**
- * Handles file operations like opening, saving, and managing images.
+ * Handles file operations such as opening, saving, and managing images.
  */
 public class FileHandler {
 
     private File currentFile;
-    private PaintingModel paintingModel;
-    private Component parent;
-
+    private final PaintingModel paintingModel;
+    private final Component parent;
     private Runnable onSaveFileCallback;
 
     /**
-     * Constructs a new FileHandler with the given PaintingModel.
+     * Constructs a new FileHandler for managing image files.
+     *
      * @param paintingModel The model holding the canvas data.
-     * @param parent The parent component for dialog windows.
+     * @param parent        The parent component for dialog windows.
      */
     public FileHandler(PaintingModel paintingModel, Component parent) {
         this.paintingModel = paintingModel;
@@ -32,7 +32,17 @@ public class FileHandler {
     }
 
     /**
-     * Starts a new file (clears the canvas and resets the file reference).
+     * Sets a callback that is executed after saving a file.
+     *
+     * @param callback The callback function to execute after saving.
+     */
+    public void setOnSaveFileCallback(Runnable callback) {
+        this.onSaveFileCallback = callback;
+        LoggingHelper.log("Datei hat keine ungespeicherten Änderungen.");
+    }
+
+    /**
+     * Starts a new file by clearing the canvas and resetting the file reference.
      */
     public void newFile() {
         paintingModel.clearCanvas();
@@ -43,7 +53,8 @@ public class FileHandler {
 
     /**
      * Opens an image file into the drawing panel.
-     * @return The loaded image, or null if canceled.
+     *
+     * @return The loaded image, or {@code null} if cancelled or failed.
      */
     public BufferedImage openFile() {
         JFileChooser fileChooser = new JFileChooser();
@@ -78,7 +89,8 @@ public class FileHandler {
 
     /**
      * Saves the current file. If no file is selected, it prompts the user.
-     * @return True if successful, false if canceled.
+     *
+     * @return {@code true} if the file was saved successfully, otherwise {@code false}.
      */
     public boolean saveFile() {
         if (currentFile == null) {
@@ -90,7 +102,8 @@ public class FileHandler {
 
     /**
      * Prompts the user to choose a file name and location, then saves the image.
-     * @return True if successful, false otherwise.
+     *
+     * @return {@code true} if the file was saved successfully, otherwise {@code false}.
      */
     public boolean saveFileAs() {
         JFileChooser fileChooser = new JFileChooser();
@@ -101,26 +114,43 @@ public class FileHandler {
             return false;
         }
 
-        File selectedFile = fileChooser.getSelectedFile();
-        String fileName = selectedFile.getName().toLowerCase();
-        String selectedExtension = fileChooser.getFileFilter().getDescription().contains("PNG") ? "png" : "jpg";
-
-        if (!fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg") && !fileName.endsWith(".png")) {
-            selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + "." + selectedExtension);
-        }
-
+        File selectedFile = ensureValidFileExtension(fileChooser.getSelectedFile(), fileChooser);
         currentFile = selectedFile;
         boolean success = writeFile(currentFile);
         if (success) {
-            updateWindowTitle(); // **HINZUGEFÜGT**
+            updateWindowTitle();
         }
         return success;
     }
 
     /**
+     * Gets the currently associated file.     *
+     * @return The current file, or {@code null} if none is set.
+     */
+    public File getCurrentFile() { return currentFile; }
+
+    /**
+     * Ensures the file has a valid image extension.
+     *
+     * @param file         The selected file.
+     * @param fileChooser  The file chooser for determining the selected format.
+     * @return A file with a proper extension.
+     */
+    private File ensureValidFileExtension(File file, JFileChooser fileChooser) {
+        String fileName = file.getName().toLowerCase();
+        String selectedExtension = fileChooser.getFileFilter().getDescription().contains("PNG") ? "png" : "jpg";
+
+        if (!fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg") && !fileName.endsWith(".png")) {
+            return new File(file.getParentFile(), file.getName() + "." + selectedExtension);
+        }
+        return file;
+    }
+
+    /**
      * Writes the image data to a file.
+     *
      * @param file The file to save to.
-     * @return True if successful, false otherwise.
+     * @return {@code true} if successful, otherwise {@code false}.
      */
     private boolean writeFile(File file) {
         try {
@@ -140,7 +170,7 @@ public class FileHandler {
             if (success) {
                 LoggingHelper.log("Speichern erfolgreich!");
                 if (onSaveFileCallback != null) {
-                    onSaveFileCallback.run();  // ✅ `hasUnsavedChanges = false` wird in MenuBarController gesetzt
+                    onSaveFileCallback.run();  // Sets 'hasUnsavedChanges = false' in MenuBarController
                 }
             } else {
                 throw new IOException(DateTimeStamp.time() + ": Fehler beim Speichern des Bildes. \n");
@@ -157,17 +187,14 @@ public class FileHandler {
         }
     }
 
+    /**
+     * Updates the window title based on the current file name.
+     */
     private void updateWindowTitle() {
         if (parent instanceof JFrame && currentFile != null) {
             ((JFrame) parent).setTitle("BasicPaint | " + currentFile.getName());
         }
     }
-
-    public void setOnSaveFileCallback(Runnable callback) {
-        this.onSaveFileCallback = callback;
-        LoggingHelper.log("Datei hat keine ungespeicherten Änderungen.");
-    }
-
 
     /**
      * Converts an image to a supported format if necessary.
@@ -183,17 +210,7 @@ public class FileHandler {
     }
 
     /**
-     * Gets the currently associated file.
-     * @return The current file, or null if none is set.
-     */
-    public File getCurrentFile() {
-        return currentFile;
-    }
-
-    /**
      * Resets the file reference (e.g., after starting a new file).
      */
-    public void resetFile() {
-        this.currentFile = null;
-    }
+    private void resetFile() { this.currentFile = null; }
 }

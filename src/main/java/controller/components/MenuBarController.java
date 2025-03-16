@@ -225,6 +225,7 @@ public class MenuBarController implements ActionListener {
     public void newFile() {
         saveCanvasState();
 
+        // TODO: Move code to FileHandler
         if (confirmDiscardChanges()) {
             fileHandler.newFile();
             hasUnsavedChanges = false;
@@ -243,6 +244,7 @@ public class MenuBarController implements ActionListener {
     public void openFile() {
         saveCanvasState();
 
+        // TODO: Move code to FileHandler
         if (confirmDiscardChanges()) {
             BufferedImage image = fileHandler.openFile();
             if (image != null) {
