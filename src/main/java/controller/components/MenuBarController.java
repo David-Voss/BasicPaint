@@ -7,13 +7,11 @@ import view.MainWindow;
 import view.components.MenuBarView;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
 public class MenuBarController implements ActionListener {
     private MainWindow mainWindow;
@@ -48,7 +46,7 @@ public class MenuBarController implements ActionListener {
 
         this.fileHandler = new FileHandler(paintingModel, mainWindow);
         this.hasUnsavedChanges = false;
-        this.fileHandler.setOnFileSavedCallback(() -> hasUnsavedChanges = false);
+        this.fileHandler.setOnSaveFileCallback(() -> hasUnsavedChanges = false);
 
         this.fileChooser = new JFileChooser();
         FileChooserConfigurator.configureFileChooser(this.fileChooser);

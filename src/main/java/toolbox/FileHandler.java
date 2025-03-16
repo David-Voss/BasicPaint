@@ -18,7 +18,7 @@ public class FileHandler {
     private PaintingModel paintingModel;
     private Component parent;
 
-    private Runnable onFileSavedCallback;
+    private Runnable onSaveFileCallback;
 
     /**
      * Constructs a new FileHandler with the given PaintingModel.
@@ -139,8 +139,8 @@ public class FileHandler {
             boolean success = ImageIO.write(image, format, file) || ImageIO.write(convertImage(image), format, file);
             if (success) {
                 LoggingHelper.log("Speichern erfolgreich!");
-                if (onFileSavedCallback != null) {
-                    onFileSavedCallback.run();  // ✅ `hasUnsavedChanges = false` wird in MenuBarController gesetzt
+                if (onSaveFileCallback != null) {
+                    onSaveFileCallback.run();  // ✅ `hasUnsavedChanges = false` wird in MenuBarController gesetzt
                 }
             } else {
                 throw new IOException(DateTimeStamp.time() + ": Fehler beim Speichern des Bildes. \n");
@@ -163,8 +163,8 @@ public class FileHandler {
         }
     }
 
-    public void setOnFileSavedCallback(Runnable callback) {
-        this.onFileSavedCallback = callback;
+    public void setOnSaveFileCallback(Runnable callback) {
+        this.onSaveFileCallback = callback;
         LoggingHelper.log("Datei hat keine ungespeicherten Änderungen.");
     }
 
