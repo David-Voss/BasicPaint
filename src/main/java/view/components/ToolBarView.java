@@ -65,7 +65,7 @@ public class ToolBarView extends JPanel {
     }
 
     /**
-     * Getter of ToolBarView
+     * Getter methods for accessing ToolBarView components.
      */
     public JComboBox<String> getBrushSizeSelector() { return brushSizeSelector; }
 
