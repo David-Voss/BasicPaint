@@ -49,87 +49,9 @@ public class MenuBarController implements ActionListener {
         this.fileChooser = new JFileChooser();
         FileChooserConfigurator.configureFileChooser(this.fileChooser);
 
-
-        initialiseShortcuts();
-        initialiseListeners();
+        initMenuBarFunctions();
+        registerCanvasInteractionListener();
         updateUndoRedoState();
-    }
-
-    public void initialiseShortcuts() {
-        // Shortcuts 'File' menu
-        menuBar.getFileMenu().setMnemonic(KeyEvent.VK_D);
-        menuBar.getNewFileItem().setAccelerator(KeyStroke.getKeyStroke('N', InputEvent.CTRL_DOWN_MASK));
-        menuBar.getOpenFileItem().setAccelerator(KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
-        menuBar.getSaveFileItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
-        menuBar.getSaveFileAsItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-        menuBar.getPrintDocumentItem().setAccelerator(KeyStroke.getKeyStroke('P', InputEvent.CTRL_DOWN_MASK));
-        menuBar.getImageProperties().setAccelerator(KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
-
-        // Shortcuts 'Edit' menu
-        menuBar.getEditMenu().setMnemonic(KeyEvent.VK_B);
-        menuBar.getUndoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK));
-        menuBar.getRedoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-    }
-
-    /**
-     * Registers action listeners for menu items and updates web search status.
-     */
-    private void initialiseListeners() {
-        // Register listeners for 'File' menu actions
-        addMenuAction(menuBar.getNewFileItem(), "new");
-        addMenuAction(menuBar.getOpenFileItem(), "open");
-        addMenuAction(menuBar.getSaveFileItem(), "save");
-        addMenuAction(menuBar.getSaveFileAsItem(), "save_as");
-        addMenuAction(menuBar.getPrintDocumentItem(), "print");
-        addMenuAction(menuBar.getImageProperties(), "image_properties");
-
-        // Register listeners for 'Edit' menu actions
-        addMenuAction(menuBar.getUndoItem(), "undo");
-        addMenuAction(menuBar.getRedoItem(), "redo");
-
-        // Register listeners for 'MenuBar-ToolBar-Buttons'
-        addMenuAction(menuBar.getNewFileButton(), "new");
-        addMenuAction(menuBar.getOpenFileButton(), "open");
-        addMenuAction(menuBar.getSaveFileButton(), "save");
-        addMenuAction(menuBar.getPrintDocumentButton(), "print");
-        addMenuAction(menuBar.getUndoButton(), "undo");
-        addMenuAction(menuBar.getRedoButton(), "redo");
-
-        mainWindow.getPaintingPanelView().addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                super.mousePressed(e);
-                saveCanvasState();
-
-                if (!hasUnsavedChanges) {
-                    System.out.println(timeStamp() + ": Zeichenfläche Bearbeitet. \n" +
-                            timeStamp() + ": Bild hat ungespeicherte Änderungen. \n");
-                    hasUnsavedChanges = true;
-                }
-            }
-        });
-    }
-
-    /**
-     * Adds an action listener to a menu item with a specific action command.
-     *
-     * @param menuItem The menu item to which the listener is added.
-     * @param command  The action command for event handling.
-     */
-    private void addMenuAction(JMenuItem menuItem, String command) {
-        menuItem.addActionListener(this);
-        menuItem.setActionCommand(command);
-    }
-
-    /**
-     * Adds an action listener to a button with a specific action command.
-     *
-     * @param jButton The button to which the listener is added.
-     * @param command The action command for event handling.
-     */
-    private void addMenuAction(JButton jButton, String command) {
-        jButton.addActionListener(this);
-        jButton.setActionCommand(command);
     }
 
     @Override
@@ -176,11 +98,89 @@ public class MenuBarController implements ActionListener {
         }
     }
 
-    public boolean getHasUnsavedChanges() { return hasUnsavedChanges; }
+    /**
+     * Adds an action listener to a menu item with a specific action command.
+     *
+     * @param menuItem The menu item to which the listener is added.
+     * @param command  The action command for event handling.
+     */
+    private void addMenuAction(JMenuItem menuItem, String command) {
+        menuItem.addActionListener(this);
+        menuItem.setActionCommand(command);
+    }
 
-    public boolean setHasUnsavedChanges(boolean bool) {
-        this.hasUnsavedChanges = bool;
-        return this.hasUnsavedChanges;
+    /**
+     * Adds an action listener to a button with a specific action command.
+     *
+     * @param jButton The button to which the listener is added.
+     * @param command The action command for event handling.
+     */
+    private void addMenuAction(JButton jButton, String command) {
+        jButton.addActionListener(this);
+        jButton.setActionCommand(command);
+    }
+
+    private void initMenuBarFunctions() {
+        initShortcuts();
+        registerFileMenuActions();
+        registerEditMenuActions();
+        registerMenuBarToolBarActions();
+        registerCanvasInteractionListener();
+    }
+
+    private void initShortcuts() {
+        // Shortcuts 'File' menu
+        menuBar.getFileMenu().setMnemonic(KeyEvent.VK_D);
+        menuBar.getNewFileItem().setAccelerator(KeyStroke.getKeyStroke('N', InputEvent.CTRL_DOWN_MASK));
+        menuBar.getOpenFileItem().setAccelerator(KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
+        menuBar.getSaveFileItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
+        menuBar.getSaveFileAsItem().setAccelerator(KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        menuBar.getPrintDocumentItem().setAccelerator(KeyStroke.getKeyStroke('P', InputEvent.CTRL_DOWN_MASK));
+        menuBar.getImageProperties().setAccelerator(KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
+
+        // Shortcuts 'Edit' menu
+        menuBar.getEditMenu().setMnemonic(KeyEvent.VK_B);
+        menuBar.getUndoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK));
+        menuBar.getRedoItem().setAccelerator(KeyStroke.getKeyStroke('Z', InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+    }
+
+    private void registerFileMenuActions() {
+        addMenuAction(menuBar.getNewFileItem(), "new");
+        addMenuAction(menuBar.getOpenFileItem(), "open");
+        addMenuAction(menuBar.getSaveFileItem(), "save");
+        addMenuAction(menuBar.getSaveFileAsItem(), "save_as");
+        addMenuAction(menuBar.getPrintDocumentItem(), "print");
+        addMenuAction(menuBar.getImageProperties(), "image_properties");
+    }
+
+    private void registerEditMenuActions() {
+        addMenuAction(menuBar.getUndoItem(), "undo");
+        addMenuAction(menuBar.getRedoItem(), "redo");
+    }
+
+    private void registerMenuBarToolBarActions() {
+        addMenuAction(menuBar.getNewFileButton(), "new");
+        addMenuAction(menuBar.getOpenFileButton(), "open");
+        addMenuAction(menuBar.getSaveFileButton(), "save");
+        addMenuAction(menuBar.getPrintDocumentButton(), "print");
+        addMenuAction(menuBar.getUndoButton(), "undo");
+        addMenuAction(menuBar.getRedoButton(), "redo");
+    }
+
+    private void registerCanvasInteractionListener() {
+        mainWindow.getPaintingPanelView().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                saveCanvasState();
+
+                if (!hasUnsavedChanges) {
+                    System.out.println(timeStamp() + ": Zeichenfläche Bearbeitet. \n" +
+                            timeStamp() + ": Bild hat ungespeicherte Änderungen. \n");
+                    hasUnsavedChanges = true;
+                }
+            }
+        });
     }
 
     private void newFile() {
