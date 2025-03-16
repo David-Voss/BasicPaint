@@ -37,20 +37,19 @@ public class MenuBarController implements ActionListener {
     private Stack<CanvasState> undoStack = new Stack<>();
     private Stack<CanvasState> redoStack = new Stack<>();
 
-    public MenuBarController(MainWindow mainWindow, MainController mainController, FileHandler fileHandler) {
+    public MenuBarController(MainWindow mainWindow, MainController mainController) {
         this.mainWindow = mainWindow;
         this.mainController = mainController;
         this.menuBar = mainWindow.getMenuBarView();
         this.paintingModel = mainWindow.getPaintingPanelView().getPaintingModel();
 
-        this.fileHandler = fileHandler;
+        this.fileHandler = new FileHandler(paintingModel, mainWindow);
         this.hasUnsavedChanges = false;
 
         this.fileChooser = new JFileChooser();
         FileChooserConfigurator.configureFileChooser(this.fileChooser);
 
         initMenuBarFunctions();
-        registerCanvasInteractionListener();
         updateUndoRedoState();
     }
 
@@ -183,176 +182,55 @@ public class MenuBarController implements ActionListener {
         });
     }
 
-    private void newFile() {
+    public void newFile() {
         saveCanvasState();
 
         if (confirmDiscardChanges()) {
-            paintingModel.clearCanvas();
-            fileHandler.resetFile();
+            fileHandler.newFile();
             hasUnsavedChanges = false;
             currentFile = null;
-            mainWindow.setTitle("BasicPaint");
+            mainWindow.setTitle("BasicPaint | Unbenannt");
 
-            // Undo- und Redo-Stack leeren
             undoStack.clear();
             redoStack.clear();
             updateUndoRedoState();
 
-            // **Sofortiges Neuzeichnen erzwingen**
             SwingUtilities.invokeLater(() -> mainWindow.getPaintingPanelView().repaint());
-
-            System.out.println(timeStamp() + ": Neues Bild erstellt. \n" +
-                    timeStamp() + ": Bild hat keine ungespeicherten Änderungen. \n" +
-                    timeStamp() + ": Neuer Bildtitel: " + mainWindow.getTitle() + "\n");
         }
     }
 
-
-    /**
-     * Opens an image file (JPG) into the drawing panel. Prompts to save current work if unsaved.
-     */
-    private void openFile() {
+    public void openFile() {
         saveCanvasState();
 
         if (confirmDiscardChanges()) {
-            BufferedImage image = fileHandler.openImage(mainWindow);
+            BufferedImage image = fileHandler.openFile();
             if (image != null) {
-                PaintingPanelView paintingPanel = mainWindow.getPaintingPanelView();
-                PaintingModel paintingModel = paintingPanel.getPaintingModel();
+                mainWindow.getPaintingPanelView().getPaintingModel().setCanvas(image);
+                mainController.getPaintingPanelController()
+                        .resizePanelWhenOpenedFileIsWiderOrHigher(image.getWidth(), image.getHeight());
 
-                // Setze das geladene Bild auf das Canvas
-                paintingModel.setCanvas(image);
-
-                // Ändere die Größe des PaintingPanels auf die Bildgröße
-                mainController.getPaintingPanelController().resizePanelWhenOpenedFileIsWiderOrHigher(image.getWidth(), image.getHeight());
-
-                paintingPanel.revalidate();
-                paintingPanel.repaint();
                 hasUnsavedChanges = false;
-
-                // Undo- und Redo-Stack leeren
                 undoStack.clear();
                 redoStack.clear();
                 updateUndoRedoState();
 
-                // Update frame title to show opened file name.
-                File openedFile = fileHandler.getFile();
+                File openedFile = fileHandler.getCurrentFile();
                 if (openedFile != null) {
                     this.currentFile = openedFile;
                     mainWindow.setTitle("BasicPaint | " + openedFile.getName());
-
-                    System.out.println(timeStamp() + ": Datei geöffnet. \n" +
-                            timeStamp() + ": currentFile = " + currentFile.getName() + ". \n" +
-                            timeStamp() + ": Bild hat keine ungespeicherten Änderungen. \n");
                 }
-            } else if (currentFile == null){
-                System.out.println(timeStamp() + ": Keine Datei gewählt. \n" +
-                        timeStamp() + ": currentFile = null. \n");
-            } else {
-                System.out.println(timeStamp() + ": Keine Datei gewählt. \n" +
-                        timeStamp() + ": currentFile = " + currentFile.getName() + ". \n");
+
+                SwingUtilities.invokeLater(() -> mainWindow.getPaintingPanelView().repaint());
             }
-            int newWidth = mainWindow.getPaintingPanelView().getPaintingModel().getCanvas().getWidth();
-            int newHeight = mainWindow.getPaintingPanelView().getPaintingModel().getCanvas().getHeight();
-            mainController.getStatusBarController().updateImageSize(newWidth, newHeight);
         }
     }
 
-    private boolean saveFile() {
-        if (currentFile == null) {
-            System.out.println(timeStamp() + ": currentFile = null -> Bild noch nicht gespeichert -> saveFileAs() wird aufgerufen.");
-            saveFileAs();
-
-            // Falls der Benutzer keine Datei ausgewählt hat, breche ab
-            if (currentFile == null) {
-                System.out.println(timeStamp() + ": Speichern abgebrochen. \n");
-                return false;
-            }
-        } else {
-            writeFile(currentFile);
-        }
-        return true;
+    public boolean saveFile() {
+        return fileHandler.saveFile();
     }
 
-    private void saveFileAs() {
-        JFileChooser fileChooser = new JFileChooser();
-        FileChooserConfigurator.configureFileChooser(fileChooser);
-
-        if (fileChooser.showSaveDialog(mainWindow) == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            String fileName = selectedFile.getName().toLowerCase();
-
-            // 1️⃣ Standardmäßige Dateiendung bestimmen (basierend auf aktivem Filter)
-            String selectedExtension = "jpg"; // Standard: JPG
-            FileNameExtensionFilter selectedFilter = (FileNameExtensionFilter) fileChooser.getFileFilter();
-
-            if (selectedFilter.getDescription().contains("PNG")) {
-                selectedExtension = "png";
-            }
-
-            // 2️⃣ Falls keine Endung angegeben wurde, automatisch anhängen
-            if (!fileName.endsWith(".jpg") && !fileName.endsWith(".jpeg") && !fileName.endsWith(".png")) {
-                selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + "." + selectedExtension);
-            }
-
-            this.currentFile = selectedFile;
-            writeFile(currentFile);
-        } else {
-            System.out.println(timeStamp() + ": Datei wurde nicht ausgewählt.");
-        }
-    }
-
-    private void writeFile(File file) {
-        try {
-            BufferedImage image = paintingModel.getCanvas();
-            if (image == null) {
-                System.out.println("Fehler: Das Bildobjekt ist null. Überprüfe paintingModel.getCanvas().");
-                return;
-            }
-
-            if (file.exists() && !file.canWrite()) {
-                System.out.println("Fehler: Die Datei ist schreibgeschützt oder von einem anderen Prozess gesperrt.");
-                return;
-            }
-
-            // 1️⃣ Dateiformat bestimmen (JPG oder PNG)
-            String format = "jpg"; // Standard ist JPG
-            String fileName = file.getName().toLowerCase();
-            if (fileName.endsWith(".png")) {
-                format = "png";
-            }
-
-            // 2️⃣ Datei speichern mit dem richtigen Format
-            boolean success = ImageIO.write(image, format, file);
-
-            if (!success) {
-                boolean secondTry = ImageIO.write(convertImage(image), format, file);
-
-                if (!success && !secondTry) throw new IOException("ImageIO.write() konnte das Bild nicht speichern.");
-            }
-
-            mainWindow.setTitle("BasicPaint | " + file.getName());
-            System.out.println(timeStamp() + ": Speichere Datei nach: " + file.getAbsolutePath());
-            hasUnsavedChanges = false;
-            System.out.println(timeStamp() + ": Änderungen gespeichert -> hasUnsavedChanges = false \n");
-
-        } catch (IOException e) {
-            System.out.print(timeStamp() + ": ");
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(mainWindow,
-                    "Fehler beim Speichern der Datei.\n" + e.getMessage(),
-                    "Fehler",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private BufferedImage convertImage(BufferedImage image) {
-        BufferedImage formattedImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = formattedImage.createGraphics();
-        g.drawImage(image, 0, 0, null);
-        g.dispose();
-        System.out.println(timeStamp() + ": convertImage() wurde aufgerufen.");
-        return formattedImage;
+    public void saveFileAs() {
+        fileHandler.saveFileAs();
     }
 
     private void printPicture() {
