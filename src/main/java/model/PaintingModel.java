@@ -1,6 +1,7 @@
 package model;
 
 import toolbox.DateTimeStamp;
+import toolbox.LoggingHelper;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -8,34 +9,39 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.awt.Point;
 
+/**
+ * Manages the painting canvas, including drawing operations and flood fill.
+ */
 public class PaintingModel {
     private BufferedImage canvas;
     private Graphics2D g2d;
-
     private Color currentColour;
-
     private Color backgroundColour;
-
     private int strokeWidth;
 
-    public PaintingModel() {
-        // Standardgröße des Canvas, z.B. 800x600 Pixel.
-        this(1247, 1247);
-    }
-
+    /**
+     * Constructs a new painting model with the specified dimensions.
+     *
+     * @param width  The width of the canvas.
+     * @param height The height of the canvas.
+     */
     public PaintingModel(int width, int height) {
-        canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        g2d = canvas.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        backgroundColour = Color.WHITE;
-        clearCanvas();
+        this.canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        this.g2d = canvas.createGraphics();
+        this.g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        currentColour = Color.BLACK;
-        strokeWidth = 3;
+        this.backgroundColour = Color.WHITE;
+        this.currentColour = Color.BLACK;
+        this.strokeWidth = 3;
+
         g2d.setColor(currentColour);
         g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        clearCanvas();
     }
 
+    /**
+     * Getter methods for accessing PaintinModel components.
+     */
     public BufferedImage getCanvas() { return canvas; }
     public Graphics2D getG2D() { return g2d; }
     public Color getCurrentColour() { return currentColour; }
@@ -43,37 +49,53 @@ public class PaintingModel {
     public int getStrokeWidth() { return strokeWidth; }
 
     /**
-     * Replaces the current canvas image with a new image (for example, when loading a file).
-     * @param newImage the new BufferedImage to use as the canvas
+     * Replaces the current canvas with a new image (for example, when loading a file).
+     *
+     * @param newImage The new BufferedImage to use as the canvas.
      */
     public void setCanvas(BufferedImage newImage) {
         this.canvas = newImage;
         g2d = canvas.createGraphics();
-        // Resize the panel to fit new image if necessary.
-        //g2d.revalidate();
-        //g2d.repaint();
     }
 
+    /**
+     * Resizes the canvas while preserving the current content.
+     *
+     * @param width  The new width.
+     * @param height The new height.
+     */
     public void setCanvasSize(int width, int height) {
-        // 1️⃣ Neues BufferedImage mit neuer Größe erstellen
         BufferedImage newCanvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D tempG2D = newCanvas.createGraphics();
+        tempG2D.setColor(backgroundColour);
+        tempG2D.fillRect(0, 0, width, height);
+        tempG2D.drawImage(canvas, 0, 0, null);
+        tempG2D.dispose();
 
-        // 2️⃣ Altes Bild auf das neue Canvas übertragen
-        Graphics2D g2d = newCanvas.createGraphics();
-        g2d.setColor(backgroundColour);
-        g2d.fillRect(0,0, width, height);
-        g2d.drawImage(canvas, 0, 0, null);
-        g2d.dispose();
+        LoggingHelper.log("Größe der Zeichenfläche geändert. \n" +
+                LoggingHelper.formatMessage("Neue Breite: " + width + " px \n" +
+                        LoggingHelper.formatMessage("Neue Höhe: " + height + " px \n")));
 
-        // 3️⃣ Neues Canvas im Model setzen
         setCanvas(newCanvas);
     }
 
+    /**
+     * Updates the current drawing colour.
+     *
+     * @param colour The new colour to be used for drawing.
+     */
     public void setCurrentColour(Color colour) {
-        //colourChange();
         this.currentColour = colour;
         g2d.setColor(colour);
+        LoggingHelper.log("Farbe gewechselt. \n" +
+                LoggingHelper.formatMessage("Neue Farbe: " + currentColour + "\n"));
     }
+
+    /**
+     * Updates the stroke width.
+     *
+     * @param strokeWidth The new stroke width in pixels.
+     */
     public void setStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;
         if (g2d == null) {  // Falls `g2d` nicht existiert, neu erstellen
@@ -83,93 +105,111 @@ public class PaintingModel {
     }
 
     /**
-     * Zeichnet eine Linie (bzw. ein Freihand-Liniensegment) von (x1,y1) bis (x2,y2) auf das Canvas.
-     * Verwendet die aktuelle Farbe und Strichstärke.
-     * Kann für freies Zeichnen (viele kurze Segmente) oder eine einzelne Linie genutzt werden.
-     * @param x1 Startpunkt X-Koordinate
-     * @param y1 Startpunkt Y-Koordinate
-     * @param x2 Endpunkt X-Koordinate
-     * @param y2 Endpunkt Y-Koordinate
+     * Draws a straight line from (x1, y1) to (x2, y2) on the canvas.
+     * Uses the currently selected colour and stroke width.
+     * This method can be used for both freehand drawing (many short segments)
+     * or for drawing a single straight line.
+     *
+     * @param x1 The starting X-coordinate.
+     * @param y1 The starting Y-coordinate.
+     * @param x2 The ending X-coordinate.
+     * @param y2 The ending Y-coordinate.
      */
     public void drawLine(int x1, int y1, int x2, int y2) {
         g2d.setColor(currentColour);
-        g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+        g2d.setStroke(new BasicStroke(
+                strokeWidth,
+                BasicStroke.CAP_BUTT,
+                BasicStroke.JOIN_MITER
+        ));
         g2d.drawLine(x1, y1, x2, y2);
     }
 
     /**
-     * Zeichnet ein Rechteck auf das Canvas, definiert durch zwei gegenüberliegende Eckpunkte (x1,y1) und (x2,y2).
-     * Zeichnet den Rechteckumriss mit aktueller Farbe und Strichstärke.
-     * Negative Breite/Höhe werden intern korrigiert (Koordinaten normalisiert).
-     * @param x1 X-Koordinate des ersten Eckpunkts (z.B. Maus-Press)
-     * @param y1 Y-Koordinate des ersten Eckpunkts (z.B. Maus-Press)
-     * @param x2 X-Koordinate des gegenüberliegenden Eckpunkts (z.B. Maus-Release)
-     * @param y2 Y-Koordinate des gegenüberliegenden Eckpunkts (z.B. Maus-Release)
+     * Draws a rectangle on the canvas using two opposite corners (x1, y1) and (x2, y2).
+     * The rectangle is outlined using the current colour and stroke width.
+     * If negative width or height values are given, the coordinates are normalized internally.
+     *
+     * @param x1 The X-coordinate of the first corner (e.g., mouse press).
+     * @param y1 The Y-coordinate of the first corner (e.g., mouse press).
+     * @param x2 The X-coordinate of the opposite corner (e.g., mouse release).
+     * @param y2 The Y-coordinate of the opposite corner (e.g., mouse release).
      */
     public void drawRectangle(int x1, int y1, int x2, int y2) {
         g2d.setColor(currentColour);
-        // obere linke Ecke und Breite/Höhe berechnen
         int x = Math.min(x1, x2);
         int y = Math.min(y1, y2);
         int width = Math.abs(x2 - x1);
         int height = Math.abs(y2 - y1);
-        g2d.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+        g2d.setStroke(new BasicStroke(
+                strokeWidth,
+                BasicStroke.CAP_BUTT,
+                BasicStroke.JOIN_MITER
+        ));
         g2d.drawRect(x, y, width, height);
     }
 
     /**
-     * Zeichnet eine Ellipse (Oval) auf das Canvas.
-     * Der umlaufende Rahmen der Ellipse wird durch (x1,y1) und (x2,y2) definiert.
-     * Zeichnet den Ellipsen-Umriss mit aktueller Farbe und Strichstärke.
-     * @param x1 X-Koordinate des ersten Eckpunkts des Begrenzungsrechtecks
-     * @param y1 Y-Koordinate des ersten Eckpunkts des Begrenzungsrechtecks
-     * @param x2 X-Koordinate des gegenüberliegenden Eckpunkts des Begrenzungsrechtecks
-     * @param y2 Y-Koordinate des gegenüberliegenden Eckpunkts des Begrenzungsrechtecks
+     * Draws an ellipse (oval) on the canvas.
+     * The bounding box for the ellipse is defined by two opposite corners (x1, y1) and (x2, y2).
+     * The ellipse is outlined using the current colour and stroke width.
+     *
+     * @param x1 The X-coordinate of the first corner of the bounding box.
+     * @param y1 The Y-coordinate of the first corner of the bounding box.
+     * @param x2 The X-coordinate of the opposite corner of the bounding box.
+     * @param y2 The Y-coordinate of the opposite corner of the bounding box.
      */
     public void drawEllipse(int x1, int y1, int x2, int y2) {
         g2d.setColor(currentColour);
-        // obere linke Ecke und Breite/Höhe des Begrenzungsrechtecks berechnen
         int x = Math.min(x1, x2);
         int y = Math.min(y1, y2);
         int width = Math.abs(x2 - x1);
         int height = Math.abs(y2 - y1);
+        g2d.setStroke(new BasicStroke(
+                strokeWidth,
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND
+        ));
         g2d.drawOval(x, y, width, height);
     }
 
-    public void floodFill(BufferedImage canvas, int x, int y, Color newColor, int baseTolerance){
+    /**
+     * Applies flood fill (paint bucket tool) to the canvas.
+     *
+     * @param x         The x-coordinate of the fill start point.
+     * @param y         The y-coordinate of the fill start point.
+     * @param newColor  The colour to fill with.
+     * @param tolerance The tolerance level for colour differences.
+     */
+    public void floodFill(BufferedImage canvas, int x, int y, Color newColor, int tolerance){
         FloodFill floodFill = new FloodFill();
-        floodFill.floodFill(canvas, x, y, newColor, baseTolerance);
+        floodFill.floodFill(canvas, x, y, newColor, tolerance);
     }
 
     /**
-     * Löscht das gesamte Canvas, indem es mit der Hintergrundfarbe gefüllt wird.
-     * (z.B. beim Anlegen einer neuen Datei oder "Alles löschen").
-     * Die aktuelle Zeichenfarbe und Strichstärke bleiben erhalten.
+     * Clears the entire canvas by filling it with the background colour.
      */
     public void clearCanvas() {
-        // aktuelle Zeichenfarbe sichern und Hintergrund füllen
-        Color oldColor = g2d.getColor();
-        g2d.setColor(backgroundColour);
-        g2d.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        g2d.dispose();
-        g2d = canvas.createGraphics();
-        // ursprüngliche Farbe wiederherstellen
-        g2d.setColor(oldColor);
+        g2d.setBackground(backgroundColour);
+        g2d.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        g2d.setColor(currentColour); // Restore drawing colour
     }
 
+    /**
+     * Logs the initial state of the painting model to the console.
+     */
     public void showInitialPaintingModelValuesInConsole() {
-        System.out.println(timeStamp() + ": Initiale Werte PaintingModel:");
-        System.out.println(timeStamp() + ": Zeichenfläche Höhe = " + canvas.getHeight() + " px.");
-        System.out.println(timeStamp() + ": Zeichenfläche Breite = " + canvas.getWidth() + " px.");
-        System.out.println(timeStamp() + ": currentColour = " + getCurrentColour() + ".");
-        System.out.println(timeStamp() + ": backgroundColour = " + getBackgroundColour() + ".");
-        System.out.println(timeStamp() + ": strokeWidth = " + getStrokeWidth() + " px. \n");
+        LoggingHelper.log("Initiale Werte PaintingModel:");
+        LoggingHelper.log("Zeichenfläche Höhe = " + canvas.getHeight() + " px.");
+        LoggingHelper.log("Zeichenfläche Breite = " + canvas.getWidth() + " px.");
+        LoggingHelper.log("currentColour = " + getCurrentColour() + ".");
+        LoggingHelper.log("backgroundColour = " + getBackgroundColour() + ".");
+        LoggingHelper.log("strokeWidth = " + getStrokeWidth() + " px. \n");
     }
 
-    private String timeStamp() {
-        return DateTimeStamp.time();
-    }
-
+    /**
+     * Handles flood fill (paint bucket) functionality.
+     */
     public class FloodFill {
 
         public void floodFill(BufferedImage canvas, int x, int y, Color newColor, int baseTolerance) {
