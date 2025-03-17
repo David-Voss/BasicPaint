@@ -130,6 +130,9 @@ public class PaintingPanelView extends JPanel {
         g2d.setColor(isPreviewEraser ? paintingModel.getBackgroundColour() : paintingModel.getCurrentColour());
 
         int size = paintingModel.getStrokeWidth();
-        g2d.fillOval(previewPoint.x - size / 2, previewPoint.y - size / 2, size, size);
+        float correctedX = previewPoint.x - (size / 2.0f);
+        float correctedY = previewPoint.y - (size / 2.0f);
+
+        g2d.fillOval(Math.round(correctedX), Math.round(correctedY), size, size);
     }
 }

@@ -306,7 +306,7 @@ public class MenuBarController implements ActionListener {
             int newWidth = controller.getImageWidth();
             int newHeight = controller.getImageHeight();
 
-            mainController.getPaintingPanelController().setCanvasSize(newWidth, newHeight);
+            mainController.getPaintingPanelController().setAndUpdateCanvasAndImageSize(newWidth, newHeight);
             LoggingHelper.log("Neue Größe gesetzt: " + newWidth + "x" + newHeight + "\n");
         }
     }

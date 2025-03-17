@@ -44,6 +44,22 @@ public class PaintingPanelController {
         initListeners();
     }
 
+    public void setAndUpdateCanvasAndImageSize(int width, int height) {
+        paintingModel.setCanvasSize(width, height);
+        setPaintingPanelSize(width, height);
+
+        mainController.getStatusBarController().updateImageSize(width, height);
+    }
+
+    public void resizePanelWhenOpenedFileIsWiderOrHigher(int width, int height) {
+        boolean isWider = width > paintingView.getWidth();
+        boolean isHigher = height > paintingView.getWidth();
+
+        if (isWider || isHigher) {
+            setPaintingPanelSize(width, height);
+        }
+    }
+
     private void initListeners() {
         registerMouseListener();
         registerKeyListener();
@@ -237,8 +253,10 @@ public class PaintingPanelController {
                 paintingModel.getG2D().fillRect(e.getX(), e.getY(), paintingModel.getStrokeWidth(), paintingModel.getStrokeWidth());
                 LoggingHelper.log("Punkt gesetzt.");
             } else {
-                new FreeDrawing(paintingModel).drawCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)));
-                new FreeDrawing(paintingModel).fillCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), toolBarView.getSelectedTool());
+                new FreeDrawing(paintingModel).drawPoint(e.getX(), e.getY(), toolBarView.getSelectedTool());
+                /*int radius = paintingModel.getStrokeWidth() / 2;
+                new FreeDrawing(paintingModel).drawCircle(e.getX(), e.getY(), radius);
+                new FreeDrawing(paintingModel).fillCircle(e.getX(), e.getY(), radius, toolBarView.getSelectedTool());*/
                 LoggingHelper.log("Punkt gesetzt.");
             }
             paintingView.repaint();
@@ -263,23 +281,7 @@ public class PaintingPanelController {
         paintingView.repaint(); // Ansicht aktualisieren
     }
 
-    public void setCanvasSize(int width, int height) {
-        paintingModel.setCanvasSize(width, height);
-        setPaintingPanelSize(width, height);
-
-        mainController.getStatusBarController().updateImageSize(width, height);
-    }
-
-    public void resizePanelWhenOpenedFileIsWiderOrHigher(int width, int height) {
-        boolean isWider = width > paintingView.getWidth();
-        boolean isHigher = height > paintingView.getWidth();
-
-        if (isWider || isHigher) {
-            setPaintingPanelSize(width, height);
-        }
-    }
-
-    public void setPaintingPanelSize(int width, int height) {
+    private void setPaintingPanelSize(int width, int height) {
         paintingView.setPreferredSize(new Dimension(width, height));
         paintingView.revalidate(); // Aktualisiert das Layout-Management
         paintingView.repaint(); // Zeichnet das Panel neu

@@ -89,7 +89,7 @@ public class ToolBarView extends JPanel {
      * Initialises the brush size selector, allowing users to choose different brush thicknesses.
      */
     private void initBrushSizeSelector() {
-        this.brushSizeSelector = new JComboBox<>(new String[]{"1 px", "2 px", "3 px", "5 px", "10 px", "20 px", "30 px", "50 px", "100 px", "150 px", "200 px", "250 px"});
+        this.brushSizeSelector = new JComboBox<>(new String[]{"1 px", "2 px", "3 px", "4 px", "5 px", "10 px", "20 px", "30 px", "50 px", "100 px", "150 px", "200 px", "250 px"});
         this.brushSizeSelector.setSelectedItem("3 px");
         this.brushSizeSelector.setToolTipText("Strichstärke | Kleiner [Q] / Größer [W]");
 
