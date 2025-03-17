@@ -28,7 +28,7 @@ public class PaintingModel {
     public PaintingModel(int width, int height) {
         this.canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         this.g2d = canvas.createGraphics();
-        this.g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        this.g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF); // TODO: Implement function to switch antialiasing on/off after a floolFill function has been implemented that takes antialiasing sufficiently into account.
 
         this.backgroundColour = Color.WHITE;
         this.currentColour = Color.BLACK;
@@ -181,9 +181,8 @@ public class PaintingModel {
      * @param newColor  The colour to fill with.
      * @param tolerance The tolerance level for colour differences.
      */
-    public void floodFill(BufferedImage canvas, int x, int y, Color newColor, int tolerance){
-        FloodFill floodFill = new FloodFill();
-        floodFill.floodFill(canvas, x, y, newColor, tolerance);
+    public void floodFill(int x, int y, Color newColor, int tolerance) {
+        new FloodFill(canvas).fill(x, y, newColor, tolerance);
     }
 
     /**
@@ -208,82 +207,104 @@ public class PaintingModel {
     }
 
     /**
-     * Handles flood fill (paint bucket) functionality.
+     * Implements the flood fill (paint bucket) algorithm for filling an area with a new colour.
+     * Ensures that the fill operation remains within the image boundaries and respects a tolerance level.
      */
-    public class FloodFill {
+    public static class FloodFill {
+        private final BufferedImage canvas;
 
-        public void floodFill(BufferedImage canvas, int x, int y, Color newColor, int baseTolerance) {
-            int targetColor = canvas.getRGB(x, y);
-            int replacementColor = newColor.getRGB();
+        /**
+         * Constructs a FloodFill instance with the specified canvas.
+         *
+         * @param canvas The image on which the flood fill operation will be performed.
+         */
+        public FloodFill(BufferedImage canvas) {
+            this.canvas = canvas;
+        }
 
-            if (targetColor == replacementColor) return;
+        /**
+         * Performs the flood fill operation starting from the specified coordinates.
+         * Uses a queue-based approach to iteratively fill adjacent pixels while respecting the tolerance.
+         *
+         * @param x         The x-coordinate of the starting point.
+         * @param y         The y-coordinate of the starting point.
+         * @param newColor  The colour to apply to the filled area.
+         * @param tolerance The allowed colour difference for adjacent pixels.
+         */
+        public void fill(int x, int y, Color newColor, int tolerance) {
+            // Ensure the starting point is within valid bounds
+            if (!isInsideBounds(x, y)) {
+                LoggingHelper.log("FloodFill: Startkoordinaten außerhalb des gültigen Bereichs! (" + x + ", " + y + ")");
+                return;
+            }
 
-            float[][] mask = new float[canvas.getWidth()][canvas.getHeight()];
+            int targetColour = canvas.getRGB(x, y);
+            if (targetColour == newColor.getRGB()) return;
 
-            Queue<Point> queue = new PriorityQueue<>((p1, p2) -> {
-                int diff1 = colorDifference(canvas.getRGB(p1.x, p1.y), targetColor);
-                int diff2 = colorDifference(canvas.getRGB(p2.x, p2.y), targetColor);
-                return Integer.compare(diff1, diff2);
-            });
+            Queue<Point> queue = new PriorityQueue<>((p1, p2) ->
+                    Integer.compare(colorDifference(canvas.getRGB(p1.x, p1.y), targetColour),
+                            colorDifference(canvas.getRGB(p2.x, p2.y), targetColour))
+            );
 
             queue.add(new Point(x, y));
-            mask[x][y] = 1.0f;
 
             while (!queue.isEmpty()) {
                 Point p = queue.poll();
 
-                if (p.x < 0 || p.x >= canvas.getWidth() || p.y < 0 || p.y >= canvas.getHeight()) continue;
-
-                int pixelColor = canvas.getRGB(p.x, p.y);
-                int adaptiveTolerance = adjustTolerance(pixelColor, targetColor, baseTolerance);
-                if (!colorWithinTolerance(pixelColor, targetColor, adaptiveTolerance)) continue;
-
-                // Harte Farbe setzen, wenn bereits stark eingefärbt wurde
-                if (mask[p.x][p.y] >= 0.9) {
-                    canvas.setRGB(p.x, p.y, replacementColor);
-                } else {
-                    // Nur in Randbereichen mischen
-                    double blendFactor = mask[p.x][p.y];
-                    int blendedColor = blendColors(pixelColor, replacementColor, blendFactor);
-
-                    // Falls die Farbabweichung zu groß ist, setze direkt die neue Farbe
-                    if (colorDifference(blendedColor, replacementColor) > 10) {
-                        canvas.setRGB(p.x, p.y, replacementColor);
-                    } else {
-                        canvas.setRGB(p.x, p.y, blendedColor);
-                    }
+                // Validate pixel position before accessing it
+                if (!isInsideBounds(p.x, p.y)) {
+                    //LoggingHelper.log("FloodFill: Koordinate außerhalb des Bildbereichs: (" + p.x + ", " + p.y + ")");
+                    continue;
                 }
 
-                // Maske aktualisieren, aber nicht über 1.0 hinaus erhöhen
-                mask[p.x][p.y] = Math.min(mask[p.x][p.y] + 0.2f, 1.0f);
+                if (!colorWithinTolerance(canvas.getRGB(p.x, p.y), targetColour, tolerance)) {
+                    continue;
+                }
 
-                addNeighbor(queue, mask, p.x + 1, p.y, canvas);
-                addNeighbor(queue, mask, p.x - 1, p.y, canvas);
-                addNeighbor(queue, mask, p.x, p.y + 1, canvas);
-                addNeighbor(queue, mask, p.x, p.y - 1, canvas);
+                canvas.setRGB(p.x, p.y, newColor.getRGB());
+
+                // 3Add neighbouring pixels to the queue only if they are within valid bounds
+                addToQueueIfValid(queue, p.x + 1, p.y);
+                addToQueueIfValid(queue, p.x - 1, p.y);
+                addToQueueIfValid(queue, p.x, p.y + 1);
+                addToQueueIfValid(queue, p.x, p.y - 1);
             }
         }
 
-        private void addNeighbor(Queue<Point> queue, float[][] mask, int x, int y, BufferedImage canvas) {
-            if (x >= 0 && x < canvas.getWidth() && y >= 0 && y < canvas.getHeight() && mask[x][y] == 0.0f) {
+        /**
+         * Adds a point to the queue if it is within the valid image boundaries.
+         *
+         * @param queue The queue storing points to process.
+         * @param x     The x-coordinate of the point.
+         * @param y     The y-coordinate of the point.
+         */
+        private void addToQueueIfValid(Queue<Point> queue, int x, int y) {
+            if (isInsideBounds(x, y)) {
                 queue.add(new Point(x, y));
-                mask[x][y] = 0.1f;
+            } else {
+                LoggingHelper.log("FloodFill: Vermeide Out-of-Bounds-Zugriff bei (" + x + ", " + y + ")");
             }
         }
 
-        private int adjustTolerance(int color1, int color2, int baseTolerance) {
-            int difference = colorDifference(color1, color2);
-            return Math.max(baseTolerance - (difference / 10), 5);
+        /**
+         * Checks whether the given coordinates are within the image boundaries.
+         *
+         * @param x The x-coordinate.
+         * @param y The y-coordinate.
+         * @return true if the coordinates are within bounds, false otherwise.
+         */
+        private boolean isInsideBounds(int x, int y) {
+            return x >= 0 && y >= 0 && x < canvas.getWidth() && y < canvas.getHeight();
         }
 
-        private int colorDifference(int color1, int color2) {
-            Color c1 = new Color(color1, true);
-            Color c2 = new Color(color2, true);
-            return Math.abs(c1.getRed() - c2.getRed()) +
-                    Math.abs(c1.getGreen() - c2.getGreen()) +
-                    Math.abs(c1.getBlue() - c2.getBlue());
-        }
-
+        /**
+         * Determines whether two colours are within the specified tolerance.
+         *
+         * @param color1    The first colour value.
+         * @param color2    The second colour value.
+         * @param tolerance The acceptable colour difference.
+         * @return true if the colours are within the tolerance, false otherwise.
+         */
         private boolean colorWithinTolerance(int color1, int color2, int tolerance) {
             Color c1 = new Color(color1, true);
             Color c2 = new Color(color2, true);
@@ -292,15 +313,20 @@ public class PaintingModel {
                     Math.abs(c1.getBlue() - c2.getBlue()) <= tolerance);
         }
 
-        private int blendColors(int originalColor, int newColor, double blendFactor) {
-            Color orig = new Color(originalColor, true);
-            Color blend = new Color(newColor, true);
-
-            int r = (int) (orig.getRed() * (1 - blendFactor) + blend.getRed() * blendFactor);
-            int g = (int) (orig.getGreen() * (1 - blendFactor) + blend.getGreen() * blendFactor);
-            int b = (int) (orig.getBlue() * (1 - blendFactor) + blend.getBlue() * blendFactor);
-
-            return new Color(r, g, b, orig.getAlpha()).getRGB();
+        /**
+         * Calculates the colour difference between two pixel values.
+         * Used to determine priority when processing pixels in the flood fill operation.
+         *
+         * @param color1 The first colour value.
+         * @param color2 The second colour value.
+         * @return The total colour difference as an integer.
+         */
+        private int colorDifference(int color1, int color2) {
+            Color c1 = new Color(color1, true);
+            Color c2 = new Color(color2, true);
+            return Math.abs(c1.getRed() - c2.getRed()) +
+                    Math.abs(c1.getGreen() - c2.getGreen()) +
+                    Math.abs(c1.getBlue() - c2.getBlue());
         }
     }
 }

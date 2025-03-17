@@ -84,7 +84,8 @@ public class PaintingPanelController {
                         paintingView.repaint();
                     }
                     else if (toolBarView.getSelectedTool() == PaintingTool.FILL) {
-                        paintingModel.floodFill(paintingModel.getCanvas(),e.getX(), e.getY(), paintingModel.getCurrentColour(), 10);
+                        //paintingModel.floodFill(paintingModel.getCanvas(),e.getX(), e.getY(), paintingModel.getCurrentColour(), 10);
+                        paintingModel.floodFill(e.getX(),e.getY(),paintingModel.getCurrentColour(),30);
                         paintingView.repaint();
                     }
                     else if (SwingUtilities.isRightMouseButton(e) /*&& !isPencilOrEraserSelected()*/) {
