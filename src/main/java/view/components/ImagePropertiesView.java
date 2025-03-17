@@ -3,6 +3,11 @@ package view.components;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Dialog for displaying and modifying image properties.
+ * Provides options to view metadata like last modified date and file size,
+ * as well as settings to adjust resolution and dimensions.
+ */
 public class ImagePropertiesView extends JDialog {
     private JComboBox<String> dpiComboBox;
     private Label lastModifiedLabel;
