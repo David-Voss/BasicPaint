@@ -1,7 +1,7 @@
 package view.components;
 
 import toolbox.CreateIcon;
-import toolbox.PaintingTool;
+import toolbox.paintingtools.PaintingTool;
 
 import javax.swing.*;
 import javax.swing.colorchooser.AbstractColorChooserPanel;

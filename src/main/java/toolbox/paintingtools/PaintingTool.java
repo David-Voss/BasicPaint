@@ -1,4 +1,4 @@
-package toolbox;
+package toolbox.paintingtools;
 
 /**
  * Enum representing various painting tools available in the application.

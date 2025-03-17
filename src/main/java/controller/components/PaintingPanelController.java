@@ -1,9 +1,9 @@
 package controller.components;
 
 import controller.MainController;
-import toolbox.LoggingHelper;
-import toolbox.PaintingTool;
+import toolbox.*;
 import model.PaintingModel;
+import toolbox.paintingtools.*;
 import view.MainWindow;
 import view.components.PaintingPanelView;
 import view.components.ToolBarView;
@@ -86,6 +86,7 @@ public class PaintingPanelController {
             return;
         } else {
             startDrawingAction(e);
+            paintingView.repaint();
         }
     }
 
@@ -96,15 +97,15 @@ public class PaintingPanelController {
 
             switch (selectedTool) {
                 case RECTANGLE:
-                    paintingModel.drawRectangle(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                    new DrawRectangle(paintingModel).drawRectangle(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
                     LoggingHelper.log("Rechteck gezeichnet.");
                     break;
                 case ELLIPSE:
-                    paintingModel.drawEllipse(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                    new DrawEllipse(paintingModel).drawEllipse(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
                     LoggingHelper.log("Ellipse gezeichnet.");
                     break;
                 case LINE:
-                    paintingModel.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                    new DrawLine(paintingModel).drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
                     LoggingHelper.log("Linie gezeichnet.");
                     break;
                 case PENCIL:
@@ -144,7 +145,7 @@ public class PaintingPanelController {
                 startPoint = e.getPoint();
             }
 
-            freeDrawing(startPoint.x, startPoint.y, e.getX(), e.getY());
+            new FreeDrawing(paintingModel).freeDrawing(startPoint.x, startPoint.y, e.getX(), e.getY(), isEraser);
             startPoint = e.getPoint();
             paintingView.repaint();
         }
@@ -158,7 +159,8 @@ public class PaintingPanelController {
                 switch (selectedTool) {
                     case PENCIL, ERASER:
                         endPoint = e.getPoint();
-                        freeDrawing(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+                        boolean isEraser = toolBarView.getEraserButton().isSelected();
+                        new FreeDrawing(paintingModel).freeDrawing(startPoint.x, startPoint.y, e.getX(), e.getY(), isEraser);
                         startPoint = endPoint;
                         break;
                     case RECTANGLE:
@@ -235,14 +237,14 @@ public class PaintingPanelController {
                 paintingModel.getG2D().fillRect(e.getX(), e.getY(), paintingModel.getStrokeWidth(), paintingModel.getStrokeWidth());
                 LoggingHelper.log("Punkt gesetzt.");
             } else {
-                drawCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), paintingModel.getG2D());
-                fillCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), paintingModel.getG2D());
+                new FreeDrawing(paintingModel).drawCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)));
+                new FreeDrawing(paintingModel).fillCircle(e.getX(), e.getY(), ((int) Math.floor(paintingModel.getStrokeWidth() / 2.0)), toolBarView.getSelectedTool());
                 LoggingHelper.log("Punkt gesetzt.");
             }
             paintingView.repaint();
         }
         else if (toolBarView.getSelectedTool() == PaintingTool.FILL) {
-            paintingModel.floodFill(e.getX(),e.getY(),paintingModel.getCurrentColour(), 50);
+            new FloodFill(paintingModel.getCanvas()).fill(e.getX(), e.getY(), paintingModel.getCurrentColour(), 50);
             paintingView.repaint();
         }
         else if (SwingUtilities.isRightMouseButton(e)) {
@@ -281,79 +283,6 @@ public class PaintingPanelController {
         paintingView.setPreferredSize(new Dimension(width, height));
         paintingView.revalidate(); // Aktualisiert das Layout-Management
         paintingView.repaint(); // Zeichnet das Panel neu
-    }
-
-    private void eraserOrOtherToolColor() {
-        Graphics2D g2d = paintingModel.getG2D();
-
-        if (toolBarView.getEraserButton().isSelected()) {
-            g2d.setColor(paintingModel.getBackgroundColour());
-        } else {
-            g2d.setColor(paintingModel.getCurrentColour());
-        }
-    }
-
-    public void drawPoint(int x, int y) {
-        Graphics2D g2d = paintingModel.getG2D();
-        eraserOrOtherToolColor();
-        int strokeWidth = paintingModel.getStrokeWidth();
-        if (strokeWidth == 1) {
-            g2d.fillRect(x, y, 1, 1);
-        } else {
-            g2d.fillOval(x - strokeWidth / 2,
-                    y - strokeWidth / 2,
-                    strokeWidth,
-                    strokeWidth);
-        }
-    }
-
-    public void fillCircle(int centerX, int centerY, int radius, Graphics2D g2d) {
-        if (toolBarView.getSelectedTool() == PaintingTool.ERASER) {
-            g2d.setColor(paintingModel.getBackgroundColour());
-        } else {
-            g2d.setColor(paintingModel.getCurrentColour());
-        }
-        for (int y = -radius; y <= radius; y++) {
-            for (int x = -radius; x <= radius; x++) {
-                if (x * x + y * y <= radius * radius) {
-                    g2d.fillRect(centerX + x, centerY + y, 1, 1);
-                }
-            }
-        }
-    }
-
-    public void drawCircle(int centerX, int centerY, int radius, Graphics2D g2d) {
-        int x = 0;
-        int y = radius;
-        int d = 3 - 2 * radius;
-
-        while (y >= x) {
-            // Setze die 8 symmetrischen Punkte für den Kreis
-            g2d.fillRect(centerX + x, centerY + y, 1, 1);
-            g2d.fillRect(centerX - x, centerY + y, 1, 1);
-            g2d.fillRect(centerX + x, centerY - y, 1, 1);
-            g2d.fillRect(centerX - x, centerY - y, 1, 1);
-            g2d.fillRect(centerX + y, centerY + x, 1, 1);
-            g2d.fillRect(centerX - y, centerY + x, 1, 1);
-            g2d.fillRect(centerX + y, centerY - x, 1, 1);
-            g2d.fillRect(centerX - y, centerY - x, 1, 1);
-
-            x++;
-            if (d > 0) {
-                y--;
-                d = d + 4 * (x - y) + 10;
-            } else {
-                d = d + 4 * x + 6;
-            }
-        }
-    }
-
-    public void freeDrawing(int x1, int y1, int x2, int y2) {
-        if (!isPencilOrEraserSelected()) return;
-        Graphics2D g2d = paintingModel.getG2D();
-        eraserOrOtherToolColor();
-        g2d.setStroke(new BasicStroke(paintingModel.getStrokeWidth(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2d.drawLine(x1, y1, x2, y2);
     }
 
     private boolean isPencilOrEraserSelected() {

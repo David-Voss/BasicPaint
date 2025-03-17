@@ -1,7 +1,8 @@
 package controller.components;
 
 import controller.MainController;
-import toolbox.DateTimeStamp;
+import toolbox.LoggingHelper;
+import toolbox.paintingtools.PaintingTool;
 import view.MainWindow;
 import view.components.PaintingPanelView;
 import view.components.ToolBarView;
@@ -134,6 +135,33 @@ public class ToolBarController {
     }
 
     /**
+     * Updates the cursor and preview point based on the selected tool.
+     * <p>
+     * This method ensures that the correct cursor and preview behaviour are applied immediately
+     * after a tool change. If the selected tool is a Pencil or Eraser, a preview point is shown
+     * in the appropriate colour. For all other tools, the preview point is cleared.
+     * </p>
+     */
+    private void updateCursorForSelectedTool() {
+        PaintingTool selectedTool = toolBarView.getSelectedTool();
+        boolean showPreviewPoint = selectedTool == PaintingTool.PENCIL || selectedTool == PaintingTool.ERASER;
+        boolean isEraser = selectedTool == PaintingTool.ERASER;
+
+        // Retrieve the current cursor position and adjust it to the painting panel's coordinate system
+        Point cursorLocation = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(cursorLocation, paintingPanelView);
+
+        // Set or clear the preview point based on the selected tool
+        if (showPreviewPoint) {
+            paintingPanelView.setPreviewPoint(cursorLocation, isEraser);
+        } else {
+            paintingPanelView.clearPreviewPoint();
+        }
+
+        paintingPanelView.repaint();
+    }
+
+    /**
      * Increases the brush size by selecting the next available option in the dropdown.
      */
     private void increaseBrushSize() {
@@ -168,9 +196,9 @@ public class ToolBarController {
         if (selectedValue != null) {
             try {
                 paintingModel.setStrokeWidth(Integer.parseInt(selectedValue.replace(" px", "")));
-                System.out.println(timeStamp() + ": Neue Pinselbreite: " + paintingModel.getStrokeWidth() + " px \n");
+                LoggingHelper.log("Neue Pinselbreite: " + paintingModel.getStrokeWidth() + " px \n");
             } catch (NumberFormatException e) {
-                System.err.println(timeStamp() + ": Fehler beim Parsen der Pinselgröße: " + selectedValue + "\n");
+                LoggingHelper.log("Fehler beim Parsen der Pinselgröße: " + selectedValue + "\n");
             }
         }
     }
@@ -199,6 +227,7 @@ public class ToolBarController {
         }
     }
 
+
     /**
      * Registers a key binding to a specific action.
      * @param component The component to register the key binding on.
@@ -210,17 +239,10 @@ public class ToolBarController {
                 e -> {
                     action.run();
                     ensureFocus();
+                    updateCursorForSelectedTool();
                 },
                 KeyStroke.getKeyStroke(keyCode, 0),
                 JComponent.WHEN_IN_FOCUSED_WINDOW
         );
-    }
-
-    /**
-     * Retrieves the current timestamp in string format.
-     * @return The current timestamp as a formatted string.
-     */
-    private String timeStamp() {
-        return DateTimeStamp.time();
     }
 }

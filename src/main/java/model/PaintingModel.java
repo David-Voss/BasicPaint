@@ -1,6 +1,5 @@
 package model;
 
-import toolbox.FloodFill;
 import toolbox.LoggingHelper;
 
 import java.awt.*;
@@ -108,87 +107,6 @@ public class PaintingModel {
             g2d = canvas.createGraphics();
         }
         g2d.setStroke(new BasicStroke(strokeWidth));
-    }
-
-    /**
-     * Draws a straight line from (x1, y1) to (x2, y2) on the canvas.
-     * Uses the currently selected colour and stroke width.
-     * This method can be used for both freehand drawing (many short segments)
-     * or for drawing a single straight line.
-     *
-     * @param x1 The starting X-coordinate.
-     * @param y1 The starting Y-coordinate.
-     * @param x2 The ending X-coordinate.
-     * @param y2 The ending Y-coordinate.
-     */
-    public void drawLine(int x1, int y1, int x2, int y2) {
-        g2d.setColor(currentColour);
-        g2d.setStroke(new BasicStroke(
-                strokeWidth,
-                BasicStroke.CAP_BUTT,
-                BasicStroke.JOIN_MITER
-        ));
-        g2d.drawLine(x1, y1, x2, y2);
-    }
-
-    /**
-     * Draws a rectangle on the canvas using two opposite corners (x1, y1) and (x2, y2).
-     * The rectangle is outlined using the current colour and stroke width.
-     * If negative width or height values are given, the coordinates are normalized internally.
-     *
-     * @param x1 The X-coordinate of the first corner (e.g., mouse press).
-     * @param y1 The Y-coordinate of the first corner (e.g., mouse press).
-     * @param x2 The X-coordinate of the opposite corner (e.g., mouse release).
-     * @param y2 The Y-coordinate of the opposite corner (e.g., mouse release).
-     */
-    public void drawRectangle(int x1, int y1, int x2, int y2) {
-        g2d.setColor(currentColour);
-        int x = Math.min(x1, x2);
-        int y = Math.min(y1, y2);
-        int width = Math.abs(x2 - x1);
-        int height = Math.abs(y2 - y1);
-        g2d.setStroke(new BasicStroke(
-                strokeWidth,
-                BasicStroke.CAP_BUTT,
-                BasicStroke.JOIN_MITER
-        ));
-        g2d.drawRect(x, y, width, height);
-    }
-
-    /**
-     * Draws an ellipse (oval) on the canvas.
-     * The bounding box for the ellipse is defined by two opposite corners (x1, y1) and (x2, y2).
-     * The ellipse is outlined using the current colour and stroke width.
-     *
-     * @param x1 The X-coordinate of the first corner of the bounding box.
-     * @param y1 The Y-coordinate of the first corner of the bounding box.
-     * @param x2 The X-coordinate of the opposite corner of the bounding box.
-     * @param y2 The Y-coordinate of the opposite corner of the bounding box.
-     */
-    public void drawEllipse(int x1, int y1, int x2, int y2) {
-        g2d.setColor(currentColour);
-        int x = Math.min(x1, x2);
-        int y = Math.min(y1, y2);
-        int width = Math.abs(x2 - x1);
-        int height = Math.abs(y2 - y1);
-        g2d.setStroke(new BasicStroke(
-                strokeWidth,
-                BasicStroke.CAP_ROUND,
-                BasicStroke.JOIN_ROUND
-        ));
-        g2d.drawOval(x, y, width, height);
-    }
-
-    /**
-     * Applies flood fill (paint bucket tool) to the canvas.
-     *
-     * @param x         The x-coordinate of the fill start point.
-     * @param y         The y-coordinate of the fill start point.
-     * @param newColor  The colour to fill with.
-     * @param tolerance The tolerance level for colour differences.
-     */
-    public void floodFill(int x, int y, Color newColor, int tolerance) {
-        new FloodFill(canvas).fill(x, y, newColor, tolerance);
     }
 
     /**

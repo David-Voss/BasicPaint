@@ -1,4 +1,6 @@
-package toolbox;
+package toolbox.paintingtools;
+
+import toolbox.LoggingHelper;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
