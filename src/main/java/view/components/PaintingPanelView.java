@@ -125,6 +125,7 @@ public class PaintingPanelView extends JPanel {
      * @param g2d The {@link Graphics2D} context.
      */
     private void drawPreviewPoint(Graphics2D g2d) {
+        // TODO: Make the preview and drawing result identical. The preview is a few pixels smaller at the top left of the image.
         if (previewPoint == null) return;
 
         g2d.setColor(isPreviewEraser ? paintingModel.getBackgroundColour() : paintingModel.getCurrentColour());

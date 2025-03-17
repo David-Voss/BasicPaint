@@ -16,8 +16,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Controls the interaction between the painting panel and the user's input.
- * Handles drawing, shape previews, and event-based input processing.
+ * Controls the interaction between the painting panel and user input.
+ * Handles drawing actions, shape previews, and event-based input processing.
  */
 public class PaintingPanelController {
     private final MainWindow mainWindow;
@@ -29,8 +29,14 @@ public class PaintingPanelController {
     private Point startPoint;
     private Point endPoint;
     private boolean isDragging = false;
-    private boolean isDrawingShape = false; // Neue Variable für Form-Zeichnen
+    private boolean isDrawingShape = false;
 
+    /**
+     * Constructs the controller for handling user interactions with the painting panel.
+     *
+     * @param mainWindow The main application window.
+     * @param mainController The main application controller.
+     */
     public PaintingPanelController(MainWindow mainWindow, MainController mainController) {
         this.mainWindow = mainWindow;
         this.mainController = mainController;
@@ -44,13 +50,24 @@ public class PaintingPanelController {
         initListeners();
     }
 
+    /**
+     * Updates the canvas size and adjusts the painting panel dimensions accordingly.
+     *
+     * @param width The new canvas width.
+     * @param height The new canvas height.
+     */
     public void setAndUpdateCanvasAndImageSize(int width, int height) {
         paintingModel.setCanvasSize(width, height);
         setPaintingPanelSize(width, height);
-
         mainController.getStatusBarController().updateImageSize(width, height);
     }
 
+    /**
+     * Resizes the panel if the opened file is larger than the current panel size.
+     *
+     * @param width The width of the opened file.
+     * @param height The height of the opened file.
+     */
     public void resizePanelWhenOpenedFileIsWiderOrHigher(int width, int height) {
         boolean isWider = width > paintingView.getWidth();
         boolean isHigher = height > paintingView.getWidth();
@@ -60,11 +77,17 @@ public class PaintingPanelController {
         }
     }
 
+    /**
+     * Initialises and registers event listeners.
+     */
     private void initListeners() {
         registerMouseListener();
         registerKeyListener();
     }
 
+    /**
+     * Registers mouse listeners for user interaction.
+     */
     private void registerMouseListener() {
         paintingView.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -96,16 +119,26 @@ public class PaintingPanelController {
         });
     }
 
+    /**
+     * Handles mouse press events and initiates drawing actions.
+     *
+     * @param e The mouse event containing position and button information.
+     */
     private void handleMousePressedAction(MouseEvent e) {
         if (toolBarView.getMagnifierButton().isSelected()) {
             handleMagnifierAction(e);
             return;
         } else {
-            startDrawingAction(e);
+            handleDrawingAction(e);
             paintingView.repaint();
         }
     }
 
+    /**
+     * Handles mouse release events and finalises shape drawing.
+     *
+     * @param e The mouse event containing position and button information.
+     */
     private void handleMouseReleasedAction(MouseEvent e) {
         if (isDragging) {
             endPoint = e.getPoint();
@@ -142,6 +175,11 @@ public class PaintingPanelController {
         }
     }
 
+    /**
+     * Handles mouse movement to provide a preview of the drawing tool.
+     *
+     * @param e The mouse event containing position data.
+     */
     private void handleMouseMovedAction(MouseEvent e){
         // Falls der Pencil oder Eraser aktiv ist, zeige eine Vorschau des Punktes
         if (isPencilOrEraserSelected()) {
@@ -152,12 +190,17 @@ public class PaintingPanelController {
         }
     }
 
+    /**
+     * Handles mouse dragging events to draw shapes or freehand strokes.
+     *
+     * @param e The mouse event containing drag position data.
+     */
     private void handleMouseDraggedAction(MouseEvent e) {
         if (isPencilOrEraserSelected()) {
             boolean isEraser = toolBarView.getEraserButton().isSelected();
             paintingView.setPreviewPoint(e.getPoint(), isEraser);
 
-            if (startPoint == null) {  // Falls `startPoint` null ist, setze es neu
+            if (startPoint == null) {
                 startPoint = e.getPoint();
             }
 
@@ -202,12 +245,14 @@ public class PaintingPanelController {
                         break;
                 }
 
-                // Vorschau in der View setzen
                 paintingView.setPreviewShape(previewShape);
             }
         }
     }
 
+    /**
+     * Registers key listeners for keyboard shortcuts.
+     */
     private void registerKeyListener() {
         // Alternative: Bessere Methode mit InputMap für globale Tastenkombination
         paintingView.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -224,6 +269,11 @@ public class PaintingPanelController {
         });
     }
 
+    /**
+     * Handles magnifier tool actions.
+     *
+     * @param e The mouse event containing position and button details.
+     */
     private void handleMagnifierAction(MouseEvent e) {
         e.consume();
 
@@ -234,7 +284,12 @@ public class PaintingPanelController {
         }
     }
 
-    private void startDrawingAction(MouseEvent e) {
+    /**
+     * Initiates a drawing action based on the selected tool.
+     *
+     * @param e The mouse event containing position and button details.
+     */
+    private void handleDrawingAction(MouseEvent e) {
         if (!isDragging) {
             LoggingHelper.log("Zeichenfläche wird bearbeitet. \n" +
                     LoggingHelper.formatMessage("Tool: " + toolBarView.getSelectedTool().getDisplayName()));
@@ -253,10 +308,8 @@ public class PaintingPanelController {
                 paintingModel.getG2D().fillRect(e.getX(), e.getY(), paintingModel.getStrokeWidth(), paintingModel.getStrokeWidth());
                 LoggingHelper.log("Punkt gesetzt.");
             } else {
+                // TODO: Make the preview and drawing result identical. The preview is a few pixels smaller at the top left of the image.
                 new FreeDrawing(paintingModel).drawPoint(e.getX(), e.getY(), toolBarView.getSelectedTool());
-                /*int radius = paintingModel.getStrokeWidth() / 2;
-                new FreeDrawing(paintingModel).drawCircle(e.getX(), e.getY(), radius);
-                new FreeDrawing(paintingModel).fillCircle(e.getX(), e.getY(), radius, toolBarView.getSelectedTool());*/
                 LoggingHelper.log("Punkt gesetzt.");
             }
             paintingView.repaint();
@@ -268,35 +321,60 @@ public class PaintingPanelController {
         else if (SwingUtilities.isRightMouseButton(e)) {
             LoggingHelper.log("Zeichnen abgebrochen (rechte Maustaste). \n");
             cancelDrawing();
-            return; // Sofort beenden, nichts weiter tun
+            return;
         }
     }
 
+    /**
+     * Cancels an ongoing drawing operation and clears the preview.
+     */
     private void cancelDrawing() {
         isDragging = false;
-        isDrawingShape = false; // Form-Zeichnen abbrechen
+        isDrawingShape = false;
         startPoint = null;
         endPoint = null;
-        paintingView.clearPreviewShape(); // Vorschau löschen
-        paintingView.repaint(); // Ansicht aktualisieren
+        paintingView.clearPreviewShape();
+        paintingView.repaint();
     }
 
+    /**
+     * Updates the painting panel size.
+     *
+     * @param width The new panel width.
+     * @param height The new panel height.
+     */
     private void setPaintingPanelSize(int width, int height) {
         paintingView.setPreferredSize(new Dimension(width, height));
-        paintingView.revalidate(); // Aktualisiert das Layout-Management
-        paintingView.repaint(); // Zeichnet das Panel neu
+        paintingView.revalidate();
+        paintingView.repaint();
     }
 
+    /**
+     * Checks if the selected tool is either a pencil or eraser.
+     *
+     * @return True if the pencil or eraser tool is selected, false otherwise.
+     */
     private boolean isPencilOrEraserSelected() {
         return toolBarView.getPencilButton().isSelected() || toolBarView.getEraserButton().isSelected();
     }
 
+    /**
+     * Checks if the selected tool is a shape drawing tool (rectangle, ellipse, or line).
+     *
+     * @return True if a shape tool is selected, false otherwise.
+     */
     private boolean isPaintingToolSelected() {
         return toolBarView.getLineButton().isSelected() ||
                 toolBarView.getEllipseButton().isSelected() ||
                 toolBarView.getRectangleButton().isSelected();
     }
 
+    /**
+     * Checks if a specific painting tool is currently selected.
+     *
+     * @param tool The tool to check.
+     * @return True if the specified tool is selected, false otherwise.
+     */
     private boolean isPaintingToolSelected(PaintingTool tool) {
         return toolBarView.getSelectedTool() == tool;
     }
