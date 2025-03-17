@@ -156,6 +156,7 @@ public class DiscardChangesHandler {
 
             if (!isSaveSuccessful) {
                 LoggingHelper.log("Speichern abgebrochen oder fehlgeschlagen. \n");
+                return false;
             }
 
             return true;
