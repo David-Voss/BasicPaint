@@ -31,7 +31,7 @@ Consisting of the following components:
 ![screenshot_exampleDrawing.png](assets/screenshots/screenshot_exampleDrawing.png)
 - This picture shows an example drawing with the following tools: line, ellipse, rectangle and the fill function using various colours. 
 
-![screenshot_ImagePropertiesView.png](assets/screenshots/screenshot_MainWindow.png)
+![screenshot_ImagePropertiesView.png](assets/screenshots/screenshot_ImagePropertiesView.png)
 - Here you can see the image properties window. 
 - If an existing jpg or png file is loaded into the application, it shows the last saving date and the size on the hard disk as well. If no file is loaded it shows 'Not available'. 
 - Besides that it is possible to change the Unit (pixel, centimeter, inch) for setting the size of the drawing area. 
