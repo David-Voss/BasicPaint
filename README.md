@@ -4,7 +4,7 @@ A very simple Java Swing drawing application oriented on the example of MS Paint
 // Note: The application is currently only available with a German-language user interface.
 
 ## Preview the application:
-![Screenshot 2025-03-17 163219.png](..%2F..%2F..%2FPictures%2FScreenshots%2FScreenshot%202025-03-17%20163219.png)
+![screenshot_MainWindow.png](assets/screenshots/screenshot_MainWindow.png)
 - The main window with all necessary components for a smooth and intuitive painting process. It contains the following features:
 
 #### Menu bar
@@ -28,10 +28,10 @@ Consisting of the following components:
 - A JLabel to display the current x and y coordinates of the mouse cursor
 - Another JLable to display the size of the current painting area in px
 
-![Screenshot 2025-03-17 164205.png](..%2F..%2F..%2FPictures%2FScreenshots%2FScreenshot%202025-03-17%20164205.png)
+![screenshot_exampleDrawing.png](assets/screenshots/screenshot_exampleDrawing.png)
 - This picture shows an example drawing with the following tools: line, ellipse, rectangle and the fill function using various colours. 
 
-![Screenshot 2025-03-17 164240.png](..%2F..%2F..%2FPictures%2FScreenshots%2FScreenshot%202025-03-17%20164240.png)
+![screenshot_ImagePropertiesView.png](assets/screenshots/screenshot_MainWindow.png)
 - Here you can see the image properties window. 
 - If an existing jpg or png file is loaded into the application, it shows the last saving date and the size on the hard disk as well. If no file is loaded it shows 'Not available'. 
 - Besides that it is possible to change the Unit (pixel, centimeter, inch) for setting the size of the drawing area. 
