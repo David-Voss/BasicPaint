@@ -1,7 +1,12 @@
 # BasicPaint
-A very simple Java Swing drawing application oriented on the example of MS Paint.
 
-// Note: The application is currently only available with a German-language user interface.
+![Language: German](https://img.shields.io/badge/language-German-blue)
+![Java](https://img.shields.io/badge/built_with-Java-yellow)
+![Swing](https://img.shields.io/badge/gui-Swing-blue)
+
+
+>A very simple Java Swing drawing application oriented on the example of MS Paint.
+> <br><br>**Note:** The application's user interface is currently only available in **German**.
 
 ## Preview the application:
 ![screenshot_MainWindow.png](assets/screenshots/screenshot_MainWindow.png)
